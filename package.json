@@ -35,5 +35,11 @@
   ],
   "author": "AICTE FlowGuard Team",
   "license": "UNLICENSED",
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@9.0.0",
+  "devDependencies": {
+    "prisma": "5.17.0"
+  },
+  "dependencies": {
+    "@prisma/client": "5.17.0"
+  }
 }
