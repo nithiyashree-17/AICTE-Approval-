@@ -1,0 +1,540 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------------------------------
+// 1. Authentication, Users & Scoped RBAC
+// -----------------------------------------------------------------------------
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum RoleType {
+  INSTITUTION
+  REGIONAL_OFFICER
+  BUREAU_OFFICER
+  SCRUTINY_OFFICER
+  EVC_COORDINATOR
+  EVC_MEMBER
+  SAC_SHC
+  COMPETENT_AUTHORITY
+  SYSTEM_ADMINISTRATOR
+  AUDITOR
+}
+
+model User {
+  id                   String                 @id @default(uuid())
+  email                String                 @unique
+  passwordHash         String
+  fullName             String
+  status               UserStatus             @default(ACTIVE)
+  institutionId        String?
+  institution          Institution?           @relation(fields: [institutionId], references: [id])
+  assignedRegion       String?
+  roles                UserRole[]
+  createdTasks         Task[]                 @relation("TaskCreator")
+  assignedTasks        Task[]                 @relation("TaskAssignee")
+  stageHistoryActions  ApplicationStageHistory[]
+  deficienciesCreated  Deficiency[]           @relation("DeficiencyCreator")
+  evcCoordinated       EvcEvent[]             @relation("EvcCoordinator")
+  committeeAssignments CommitteeAssignment[]
+  evcReportsSubmitted  EvcReport[]
+  auditLogs            AuditLog[]
+  notifications        NotificationEvent[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@map("users")
+}
+
+model Role {
+  id          String     @id @default(uuid())
+  name        RoleType   @unique
+  description String
+  permissions Json       // Specific granular operation permissions
+  userRoles   UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId     String
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  scopeType  String?  // e.g. "REGION", "INSTITUTION", "GLOBAL"
+  scopeValue String?  // e.g. "NORTHERN_REGION", institution UUID
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, roleId, scopeType, scopeValue])
+  @@map("user_roles")
+}
+
+// -----------------------------------------------------------------------------
+// 2. Institutions & Applications
+// -----------------------------------------------------------------------------
+
+model Institution {
+  id             String                 @id @default(uuid())
+  aicteCode      String                 @unique
+  name           String
+  region         String                 // e.g. "NORTH", "SOUTH", "WEST", etc.
+  state          String
+  address        String
+  contactEmail   String
+  contactPhone   String
+  users          User[]
+  applications   Application[]
+  documents      Document[]
+  obligations    ComplianceObligation[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@map("institutions")
+}
+
+enum ApplicationType {
+  NEW_INSTITUTION_LOA
+  ROUTINE_EOA
+  EOA_SUBSTANTIVE_CHANGE
+  DEFICIENCY_HEARING_CASE
+  APPEAL_SAC
+}
+
+model Application {
+  id                    String                    @id @default(uuid())
+  applicationNumber     String                    @unique
+  institutionId         String
+  institution           Institution               @relation(fields: [institutionId], references: [id])
+  type                  ApplicationType
+  academicYear          String
+  currentState          String                    // e.g. "DRAFT", "SUBMITTED", "SCRUTINY", etc.
+  workflowDefinitionKey String
+  workflowVersion       Int
+  assignedRegion        String
+  assignedOfficerId     String?
+  stageHistory          ApplicationStageHistory[]
+  tasks                 Task[]
+  deficiencies          Deficiency[]
+  evcEvents             EvcEvent[]
+  documents             Document[]
+  obligations           ComplianceObligation[]
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+
+  @@map("applications")
+}
+
+// -----------------------------------------------------------------------------
+// 3. Workflow Engine & State Machine
+// -----------------------------------------------------------------------------
+
+model WorkflowDefinition {
+  id                  String            @id @default(uuid())
+  key                 String            @unique // e.g. "NEW_INSTITUTION_LOA_V1"
+  name                String
+  applicationCategory ApplicationType
+  description         String
+  versions            WorkflowVersion[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@map("workflow_definitions")
+}
+
+enum WorkflowConfigStatus {
+  DRAFT
+  REVIEWED
+  APPROVED
+  ACTIVE
+  ARCHIVED
+}
+
+model WorkflowVersion {
+  id                   String               @id @default(uuid())
+  workflowDefinitionId String
+  workflowDefinition   WorkflowDefinition   @relation(fields: [workflowDefinitionId], references: [id])
+  versionNumber        Int
+  status               WorkflowConfigStatus @default(DRAFT)
+  definitionJson       Json                 // Complete transitions, prerequisites & rules
+  stages               WorkflowStage[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  @@unique([workflowDefinitionId, versionNumber])
+  @@map("workflow_versions")
+}
+
+model WorkflowStage {
+  id                String          @id @default(uuid())
+  workflowVersionId String
+  workflowVersion   WorkflowVersion @relation(fields: [workflowVersionId], references: [id])
+  stageKey          String          // "SCRUTINY", "EVC_PENDING", etc.
+  displayName       String
+  responsibleRole   RoleType
+  allowedTransitions Json           // Array of next valid target stages with guard conditions
+  entryConditions   Json?
+  exitConditions    Json?
+  deadlineHours     Int?
+
+  @@unique([workflowVersionId, stageKey])
+  @@map("workflow_stages")
+}
+
+model ApplicationStageHistory {
+  id              String      @id @default(uuid())
+  applicationId   String
+  application     Application @relation(fields: [applicationId], references: [id])
+  fromState       String
+  toState         String
+  actorId         String
+  actor           User        @relation(fields: [actorId], references: [id])
+  reason          String?
+  workflowVersion Int
+  timestamp       DateTime    @default(now())
+
+  @@map("application_stage_history")
+}
+
+// -----------------------------------------------------------------------------
+// 4. Tasks & Deficiencies
+// -----------------------------------------------------------------------------
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Task {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  title         String
+  description   String?
+  assignedToId  String
+  assignedTo    User        @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  createdById   String
+  createdBy     User        @relation("TaskCreator", fields: [createdById], references: [id])
+  dueDate       DateTime?
+  status        TaskStatus  @default(PENDING)
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("tasks")
+}
+
+enum DeficiencyStatus {
+  RAISED
+  RESPONSE_SUBMITTED
+  RESOLVED
+  REJECTED
+}
+
+model Deficiency {
+  id                 String           @id @default(uuid())
+  applicationId      String
+  application        Application      @relation(fields: [applicationId], references: [id])
+  clauseReference    String?
+  observation        String
+  requiredCorrection String
+  status             DeficiencyStatus @default(RAISED)
+  createdById        String
+  createdBy          User             @relation("DeficiencyCreator", fields: [createdById], references: [id])
+  institutionResponse String?
+  responseSubmittedAt DateTime?
+  resolvedAt         DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@map("deficiencies")
+}
+
+// -----------------------------------------------------------------------------
+// 5. Expert Visit Committee (EVC)
+// -----------------------------------------------------------------------------
+
+enum EvcStatus {
+  PENDING_SCHEDULE
+  SCHEDULED
+  RESCHEDULED
+  VISIT_COMPLETED
+  REPORT_SUBMITTED
+  CANCELLED
+}
+
+enum EvcMode {
+  PHYSICAL
+  VIRTUAL
+  HYBRID
+}
+
+model EvcEvent {
+  id             String                @id @default(uuid())
+  applicationId  String
+  application    Application           @relation(fields: [applicationId], references: [id])
+  status         EvcStatus             @default(PENDING_SCHEDULE)
+  mode           EvcMode               @default(PHYSICAL)
+  scheduledDate  DateTime?
+  locationOrLink String?
+  coordinatorId  String
+  coordinator    User                  @relation("EvcCoordinator", fields: [coordinatorId], references: [id])
+  completedAt    DateTime?
+  assignments    CommitteeAssignment[]
+  reports        EvcReport[]
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@map("evc_events")
+}
+
+enum AssignmentRole {
+  CHAIRMAN
+  CONVENER
+  MEMBER
+  SPECIALIST
+}
+
+model CommitteeAssignment {
+  id             String         @id @default(uuid())
+  evcEventId     String
+  evcEvent       EvcEvent       @relation(fields: [evcEventId], references: [id], onDelete: Cascade)
+  memberUserId   String
+  member         User           @relation(fields: [memberUserId], references: [id])
+  assignmentRole AssignmentRole
+  status         String         @default("ASSIGNED")
+  assignedAt     DateTime       @default(now())
+
+  @@unique([evcEventId, memberUserId])
+  @@map("committee_assignments")
+}
+
+model EvcReport {
+  id           String    @id @default(uuid())
+  evcEventId   String
+  evcEvent     EvcEvent  @relation(fields: [evcEventId], references: [id])
+  submittedById String
+  submittedBy  User      @relation(fields: [submittedById], references: [id])
+  s3ObjectKey  String
+  version      Int       @default(1)
+  reviewStatus String    @default("SUBMITTED")
+  findings     Json?
+  submittedAt  DateTime  @default(now())
+
+  @@map("evc_reports")
+}
+
+// -----------------------------------------------------------------------------
+// 6. Documents & Versioning (S3-backed)
+// -----------------------------------------------------------------------------
+
+enum DocumentVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  NEEDS_CORRECTION
+}
+
+enum DocumentValidityStatus {
+  VALID
+  EXPIRING_SOON
+  EXPIRED
+  UNKNOWN
+}
+
+model Document {
+  id             String                  @id @default(uuid())
+  institutionId  String
+  institution    Institution             @relation(fields: [institutionId], references: [id])
+  applicationId  String?
+  application    Application?            @relation(fields: [applicationId], references: [id])
+  documentType   String                  // e.g. "LAND_LEASE", "FIRE_NOC", "BUILDING_PLAN"
+  currentVersion Int                     @default(1)
+  validityStatus DocumentValidityStatus  @default(VALID)
+  expiryDate     DateTime?
+  versions       DocumentVersion[]
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id                 String                     @id @default(uuid())
+  documentId         String
+  document           Document                   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber      Int
+  s3ObjectKey        String
+  fileName           String
+  mimeType           String
+  fileSize           Int
+  sha256Checksum     String
+  verificationStatus DocumentVerificationStatus @default(PENDING)
+  verifiedById       String?
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  uploadedAt         DateTime                   @default(now())
+
+  @@unique([documentId, versionNumber])
+  @@map("document_versions")
+}
+
+// -----------------------------------------------------------------------------
+// 7. Compliance Obligations & Submissions
+// -----------------------------------------------------------------------------
+
+enum ComplianceStatus {
+  OPEN
+  SUBMITTED
+  UNDER_REVIEW
+  FULFILLED
+  OVERDUE
+}
+
+model ComplianceObligation {
+  id                 String                 @id @default(uuid())
+  institutionId      String
+  institution        Institution            @relation(fields: [institutionId], references: [id])
+  applicationId      String?
+  application        Application?           @relation(fields: [applicationId], references: [id])
+  sourceRuleId       String?
+  title              String
+  description        String
+  evidenceRequired   String
+  dueDate            DateTime
+  status             ComplianceStatus       @default(OPEN)
+  reminderPolicyJson Json?
+  submissions        ComplianceSubmission[]
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@map("compliance_obligations")
+}
+
+model ComplianceSubmission {
+  id                   String                     @id @default(uuid())
+  complianceId         String
+  obligation           ComplianceObligation       @relation(fields: [complianceId], references: [id], onDelete: Cascade)
+  versionNumber        Int                        @default(1)
+  s3ObjectKey          String
+  verificationStatus   DocumentVerificationStatus @default(PENDING)
+  reviewerNotes        String?
+  verifiedById         String?
+  submittedAt          DateTime                   @default(now())
+  verifiedAt           DateTime?
+
+  @@map("compliance_submissions")
+}
+
+// -----------------------------------------------------------------------------
+// 8. Notifications, Escalations & Outbox
+// -----------------------------------------------------------------------------
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum NotificationDeliveryStatus {
+  QUEUED
+  SENT
+  FAILED
+  BOUNCED
+}
+
+model NotificationEvent {
+  id             String                     @id @default(uuid())
+  recipientId    String
+  recipient      User                       @relation(fields: [recipientId], references: [id])
+  channel        NotificationChannel        @default(IN_APP)
+  templateKey    String
+  title          String
+  body           String
+  payload        Json?
+  deliveryStatus NotificationDeliveryStatus @default(QUEUED)
+  sentAt         DateTime?
+  readAt         DateTime?
+  errorReason    String?
+  createdAt      DateTime                   @default(now())
+
+  @@map("notification_events")
+}
+
+model EscalationEvent {
+  id             String    @id @default(uuid())
+  triggerType    String    // e.g. "DEADLINE_MISSED", "UNASSIGNED_QUEUE_OVERDUE"
+  escalationLevel Int      @default(1)
+  recipientRole  RoleType
+  referenceType  String    // e.g. "APPLICATION", "COMPLIANCE"
+  referenceId    String
+  state          String    @default("ACTIVE")
+  resolutionNote String?
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@map("escalation_events")
+}
+
+model OutboxEvent {
+  id             String    @id @default(uuid())
+  aggregateType  String    // e.g. "APPLICATION", "EVC", "COMPLIANCE"
+  aggregateId    String
+  eventType      String    // e.g. "STAGE_CHANGED", "DEFICIENCY_RAISED"
+  payload        Json
+  idempotencyKey String    @unique
+  processed      Boolean   @default(false)
+  processedAt    DateTime?
+  retryCount     Int       @default(0)
+  lastError      String?
+  createdAt      DateTime  @default(now())
+
+  @@map("outbox_events")
+}
+
+// -----------------------------------------------------------------------------
+// 9. Audit Logs & Rule Provenance
+// -----------------------------------------------------------------------------
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorId       String?
+  actor         User?    @relation(fields: [actorId], references: [id])
+  action        String
+  resourceType  String
+  resourceId    String
+  ipAddress     String?
+  userAgent     String?
+  changesBefore Json?
+  changesAfter  Json?
+  createdAt     DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model RuleVersion {
+  id              String   @id @default(uuid())
+  ruleId          String   @unique // e.g. "RULE_APH_CH1_SCRUTINY"
+  aphClause       String   // e.g. "Chapter I, Clause 1.7"
+  aphPageReference String?
+  title           String
+  description     String
+  configurationStatus WorkflowConfigStatus @default(APPROVED)
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+  provenanceNotes String?
+  createdAt       DateTime @default(now())
+
+  @@map("rule_versions")
+}

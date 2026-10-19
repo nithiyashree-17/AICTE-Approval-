@@ -1,0 +1,39 @@
+{
+  "name": "aicte-flowguard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AICTE FlowGuard - Integrated Approval Workflow Automation, Compliance Monitoring and Alert Management System (Problem ID 26262)",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "dev:worker": "pnpm --filter worker dev",
+    "build": "pnpm --recursive run build",
+    "lint": "pnpm --recursive run lint",
+    "typecheck": "pnpm --recursive run typecheck",
+    "test": "pnpm --recursive run test",
+    "test:unit": "pnpm --filter \"./packages/*\" --filter \"./apps/*\" test",
+    "test:integration": "pnpm --filter api test:e2e",
+    "test:e2e": "playwright test",
+    "prisma:generate": "pnpm --filter api prisma:generate",
+    "prisma:migrate": "pnpm --filter api prisma:migrate",
+    "prisma:studio": "pnpm --filter api prisma:studio",
+    "db:seed": "pnpm --filter api db:seed",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "keywords": [
+    "aicte",
+    "workflow-automation",
+    "compliance-monitoring",
+    "bullmq",
+    "nextjs",
+    "nestjs",
+    "prisma"
+  ],
+  "author": "AICTE FlowGuard Team",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.0.0"
+}
