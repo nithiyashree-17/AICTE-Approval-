@@ -54,3 +54,23 @@ export enum DocumentValidityStatus {
   EXPIRED = 'EXPIRED',
   UNKNOWN = 'UNKNOWN',
 }
+
+export enum DocumentVerificationStatus {
+  PENDING = 'PENDING',
+  VERIFIED = 'VERIFIED',
+  REJECTED = 'REJECTED',
+  NEEDS_CORRECTION = 'NEEDS_CORRECTION',
+}
+
+export enum EvcMode {
+  PHYSICAL = 'PHYSICAL',
+  VIRTUAL = 'VIRTUAL',
+  HYBRID = 'HYBRID',
+}
+
+export enum AssignmentRole {
+  CHAIRMAN = 'CHAIRMAN',
+  CONVENER = 'CONVENER',
+  MEMBER = 'MEMBER',
+  SPECIALIST = 'SPECIALIST',
+}
