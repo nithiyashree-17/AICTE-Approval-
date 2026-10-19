@@ -1,0 +1,29 @@
+{
+  "policyKey": "EVC_REPORT_SUBMITTED_NOTIFICATION",
+  "triggerEvent": "EVC_REPORT_FAVOURABLE_FORWARDED",
+  "description": "Alerts the EVC Coordinator and Regional Officer that the committee has submitted the signed joint inspection report and geotagged evidence.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.10",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_EVC_COORDINATOR", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER"],
+  "recipientScope": "REGIONAL_SUPERVISORS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Dispatched upon report upload."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: EVC Inspection Report Received for {{applicationNumber}}",
+    "inAppTitle": "EVC Joint Report Uploaded",
+    "inAppBodyTemplate": "Joint inspection report for {{institutionName}} ({{applicationNumber}}) has been submitted by the committee. Forwarded for decision.",
+    "emailSubjectTemplate": "AICTE EVC Report Uploaded: {{applicationNumber}}",
+    "emailHtmlTemplate": "<p>Coordinator / Regional Officer,</p><p>The Expert Visit Committee has submitted the signed joint report for application <strong>{{applicationNumber}}</strong> ({{institutionName}}).</p><p>Video log and geotagged photos are attached in the case repository.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": false,
+    "caseMustBeInStages": ["EVC_REVIEW", "DECISION_PENDING"],
+    "suppressIfResolved": false
+  },
+  "idempotencyKeyPattern": "{caseId}:EVC_REPORT_SUBMITTED_NOTIFICATION:{offset}:{recipientId}"
+}

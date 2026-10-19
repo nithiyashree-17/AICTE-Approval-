@@ -1,0 +1,28 @@
+{
+  "policyKey": "DEADLINE_MISSED_ALERT_POLICY",
+  "triggerEvent": "TASK_DEADLINE_MISSED",
+  "description": "Triggered when a case SLA or statutory deadline passes without required completion. Marks task as OVERDUE and alerts assignees and regional supervisor.",
+  "aphClauseCitation": "Section 11 Reliability & Escalation Requirements",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER"],
+  "recipientScope": "REGIONAL_SUPERVISORS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE_AT_EXPIRY",
+      "description": "Fired as soon as deadline timestamp is exceeded."
+    }
+  ],
+  "templates": {
+    "subject": "OVERDUE ALERT: AICTE Case {{applicationNumber}} Has Breached SLA Deadline",
+    "inAppTitle": "Task Overdue - Escalation Triggered",
+    "inAppBodyTemplate": "Case {{applicationNumber}} has exceeded deadline for stage {{currentStage}}. Overdue by {{overdueDays}} days.",
+    "emailSubjectTemplate": "AICTE SLA Breach Alert: {{applicationNumber}} ({{currentStage}})",
+    "emailHtmlTemplate": "<p>Supervisor / Officer,</p><p>Application <strong>{{applicationNumber}}</strong> ({{institutionName}}) in stage <strong>{{currentStage}}</strong> was due on {{dueDate}} and is now <strong>OVERDUE</strong>.</p><p>Please take immediate administrative action or review escalation logs.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{caseId}:DEADLINE_MISSED_ALERT:{offset}:{recipientId}"
+}

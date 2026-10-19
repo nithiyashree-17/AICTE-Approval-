@@ -1,0 +1,33 @@
+{
+  "key": "TEMPLATE_D_DEFICIENCY_HEARING_COMPLIANCE",
+  "name": "Template D: Standing Hearing Committee (SHC) Compliance Pathway",
+  "version": "1.0.0",
+  "status": "APPROVED",
+  "applicationCategory": "DEFICIENCY_HEARING_COMPLIANCE",
+  "aphSourceReference": "Approval Process Handbook 2024–2027 Chapter II, Clauses 2.19, 2.20 & 2.21",
+  "description": "Quasi-judicial compliance and determination workflow for applications with persistent unresolved deficiencies after re-scrutiny or adverse EVC reports. Adjudicated before the Standing Hearing Committee (SHC).",
+  "initialStage": "HEARING_OR_COMMITTEE_REVIEW",
+  "terminalStages": ["CLOSED_APPROVED", "CLOSED_REJECTED"],
+  "allowedStages": [
+    "HEARING_OR_COMMITTEE_REVIEW",
+    "EVC_PENDING",
+    "EVC_SCHEDULED",
+    "EVC_REVIEW",
+    "DECISION_PENDING",
+    "CLOSED_APPROVED",
+    "CLOSED_REJECTED"
+  ],
+  "mandatoryDocumentsOnSubmission": [
+    "ITEMIZED_DISCREPANCY_STATEMENT",
+    "PRIOR_SCRUTINY_RE_SCRUTINY_REPORTS",
+    "ADVERSE_EVC_OBSERVATION_SHEET",
+    "INSTITUTION_LEGAL_REJOINDER",
+    "AUTHORISED_ATTENDEE_NOMINATION_LETTER"
+  ],
+  "statutoryConstraints": [
+    "Minimum 5 working days advance written summons notice to institution",
+    "SHC bench must include a retired High Court Judge or senior academician of national eminence",
+    "SHC may order a surprise physical inspection (EVC) if factual physical data is disputed",
+    "SHC issues recommendations only; final statutory speaking order is reserved for Council"
+  ]
+}

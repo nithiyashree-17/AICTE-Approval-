@@ -1,0 +1,39 @@
+{
+  "policyKey": "EVC_SCHEDULED_MEMBERS_AND_INSTITUTION",
+  "triggerEvent": "EVC_SCHEDULED",
+  "description": "Notifies the institution of scheduled campus inspection date/details and issues formal assignment briefings to the 3 appointed Expert Committee members.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.9",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_EVC_MEMBER", "ROLE_EVC_COORDINATOR"],
+  "recipientScope": "COMMITTEE_MEMBERS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate dispatch on scheduling confirmation."
+    },
+    {
+      "offsetDays": -2,
+      "label": "REMINDER_T_MINUS_2D",
+      "description": "48-hour pre-visit coordination reminder."
+    },
+    {
+      "offsetDays": -1,
+      "label": "REMINDER_T_MINUS_24H",
+      "description": "24-hour final inspection check-in."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: Expert Visit Committee (EVC) Scheduled for {{applicationNumber}}",
+    "inAppTitle": "EVC Physical Inspection Confirmed",
+    "inAppBodyTemplate": "Inspection for {{institutionName}} (Case {{applicationNumber}}) is confirmed for {{scheduledDate}} (Mode: {{mode}}).",
+    "emailSubjectTemplate": "AICTE EVC Order: Inspection of {{institutionName}} on {{scheduledDate}}",
+    "emailHtmlTemplate": "<p>Dear Member / Applicant,</p><p>The Expert Visit Committee inspection for <strong>{{institutionName}}</strong> (Application: {{applicationNumber}}) is scheduled for <strong>{{scheduledDate}}</strong>.</p><p>Inspection Mode: {{mode}}</p><p>Location / Link: {{locationOrLink}}</p><p>Committee members must prepare joint inspection findings and complete video proceedings per APH norms.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "caseMustBeInStages": ["EVC_SCHEDULED"],
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{caseId}:EVC_SCHEDULED_MEMBERS_AND_INSTITUTION:{offset}:{recipientId}"
+}

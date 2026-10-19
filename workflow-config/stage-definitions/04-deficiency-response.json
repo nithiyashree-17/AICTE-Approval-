@@ -1,0 +1,72 @@
+{
+  "key": "DEFICIENCY_RESPONSE",
+  "displayName": "Deficiency Rectification Period",
+  "description": "Applicant institution rectifies flagged deficiencies by uploading certified supplementary evidence and formal rejoinder within the statutory cure window.",
+  "ownerRole": "ROLE_INSTITUTION",
+  "permittedRoles": ["ROLE_INSTITUTION", "ROLE_SCRUTINY_OFFICER", "ROLE_REGIONAL_OFFICER", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.7, 1.8 & Chapter II Cl. 2.19",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_ACTIVE_DEFICIENCY",
+      "description": "At least one unresolved deficiency record must exist on the case."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "SUBMIT_RECTIFICATION",
+      "targetStage": "RE_SCRUTINY",
+      "buttonLabel": "Submit Rectified Documents",
+      "authorizedRoles": ["ROLE_INSTITUTION"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "aphRuleCitation": "RULE-NEW-004 / Chap I Cl. 1.8",
+      "validationRules": [
+        "Every flagged deficiency must have an uploaded corrective document version",
+        "Submission must be completed prior to deficiency cure deadline",
+        "Applicant declaration of compliance must be confirmed"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "DEFICIENCY_RECTIFICATION_SUBMITTED",
+        "triggerNotificationPolicy": "DEFICIENCY_RESUBMITTED_OFFICER_ALERT",
+        "startTimerPolicy": "RE_SCRUTINY_EXECUTION_SLA"
+      }
+    },
+    {
+      "transitionName": "EXPIRE_DEFICIENCY_TO_SHC",
+      "targetStage": "HEARING_OR_COMMITTEE_REVIEW",
+      "buttonLabel": "Refer to Standing Hearing Committee (Deadline Missed)",
+      "authorizedRoles": ["ROLE_REGIONAL_OFFICER", "ROLE_SCRUTINY_OFFICER"],
+      "requiresEvidence": false,
+      "requiresReason": true,
+      "aphRuleCitation": "RULE-SHC-001 / Chap II Cl. 2.19",
+      "validationRules": [
+        "Cure deadline must have expired (NOW() > deficiency_due_date)",
+        "Institution failed to submit complete rectification within permitted window"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "DEFICIENCY_EXPIRED_REFERRED_TO_SHC",
+        "triggerNotificationPolicy": "HEARING_SUMMONS_NOTIFICATION",
+        "triggerEscalationPolicy": "DEFICIENCY_RESPONSE_ESCALATION"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 7,
+    "durationUnit": "CALENDAR_DAYS",
+    "description": "Deficiency cure SLA: Institution is given 7 calendar days to upload compliant rectification evidence.",
+    "warningOffsets": [-3, -1, 0],
+    "isStrictStatutoryCutoff": true
+  },
+  "evidenceRequirements": ["RECTIFIED_DOCUMENT_VERSIONS", "INSTITUTIONAL_REJOINDER_MEMO"],
+  "exitConditions": [
+    {
+      "code": "EXIT_DEFICIENCY_RESOLVED_OR_EXPIRED",
+      "description": "Institution re-submits evidence or case escalates to Standing Hearing Committee.",
+      "verificationCriteria": [
+        "Rectification payload received or timer expiry flag recorded"
+      ]
+    }
+  ]
+}

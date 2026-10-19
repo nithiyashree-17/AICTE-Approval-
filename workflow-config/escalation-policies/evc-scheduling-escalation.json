@@ -1,0 +1,29 @@
+{
+  "policyKey": "EVC_SCHEDULING_ESCALATION",
+  "name": "EVC Scheduling Stall Escalation",
+  "description": "Escalates cases queued in EVC_PENDING where an inspection date or 3-member committee roster has not been confirmed within SLA.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.9",
+  "triggerStageOrEvent": "EVC_PENDING",
+  "monitoredDeadlines": ["EVC_SCHEDULING_SLA"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 3,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 1: 3 days overdue past 7-day scheduling window. Alert to Regional Director to expedite panel empanelment.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Expedite committee assignment or appoint alternate experts.",
+      "systemAction": "SUPERVISOR_ALERT"
+    },
+    {
+      "level": 2,
+      "triggerDelayDaysAfterDeadline": 7,
+      "targetRole": "ROLE_BUREAU_OFFICER",
+      "description": "Level 2: 7 days overdue. Escalated to Central Approval Bureau Head for national expert pool allocation.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Reallocate experts from national roster.",
+      "systemAction": "SUPERVISOR_ALERT"
+    }
+  ],
+  "autoResolutionCondition": "EVC inspection confirmed and case moved to EVC_SCHEDULED."
+}

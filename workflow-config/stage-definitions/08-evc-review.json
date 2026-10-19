@@ -1,0 +1,86 @@
+{
+  "key": "EVC_REVIEW",
+  "displayName": "EVC Inspection Report Review",
+  "description": "Expert Committee compiles and uploads signed joint inspection report, geotagged infrastructural photographs, laboratory equipment checklists, and video links.",
+  "ownerRole": "ROLE_EVC_MEMBER",
+  "permittedRoles": ["ROLE_EVC_MEMBER", "ROLE_EVC_COORDINATOR", "ROLE_REGIONAL_OFFICER", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.10 & Chapter II Table 2.3",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_INSPECTION_CONDUCTED",
+      "description": "Physical visit completed by appointed committee members."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "FORWARD_EVC_RECOMMENDATION_TO_DECISION",
+      "targetStage": "DECISION_PENDING",
+      "buttonLabel": "Submit Favourable EVC Report to Competent Authority",
+      "authorizedRoles": ["ROLE_EVC_COORDINATOR", "ROLE_REGIONAL_OFFICER"],
+      "requiresEvidence": true,
+      "requiresReason": false,
+      "requiredEvidenceTypes": [
+        "SIGNED_JOINT_EVC_REPORT",
+        "GEOTAGGED_PHOTOS_ZIP",
+        "VIDEO_PROCEEDINGS_LINK"
+      ],
+      "aphRuleCitation": "RULE-NEW-006 / Chap I Cl. 1.10",
+      "validationRules": [
+        "Report must recommend approval with zero unrectified physical deficiencies",
+        "Minimum 2 committee members must digitally sign the report",
+        "Video recording link must be verified accessible",
+        "Geotagged photographs must have valid metadata coordinates"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "EVC_REPORT_FAVOURABLE_FORWARDED",
+        "triggerNotificationPolicy": "DECISION_PENDING_NOTIFICATION"
+      }
+    },
+    {
+      "transitionName": "REFER_EVC_DEFICIENCIES_TO_SHC",
+      "targetStage": "HEARING_OR_COMMITTEE_REVIEW",
+      "buttonLabel": "Refer Adverse EVC Report to Standing Hearing Committee",
+      "authorizedRoles": ["ROLE_EVC_COORDINATOR", "ROLE_REGIONAL_OFFICER"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": [
+        "SIGNED_JOINT_EVC_REPORT",
+        "EVC_DEFICIENCY_STATEMENT"
+      ],
+      "aphRuleCitation": "RULE-SHC-001 / Chap II Cl. 2.19, 2.20",
+      "validationRules": [
+        "Adverse observations recorded (e.g., inadequate built-up area, missing lab equipment)",
+        "Itemized EVC Deficiency Statement attached for hearing bench"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "EVC_ADVERSE_REFERRED_TO_SHC",
+        "triggerNotificationPolicy": "HEARING_SUMMONS_NOTIFICATION",
+        "triggerEscalationPolicy": "EVC_REPORT_ESCALATION"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 24,
+    "durationUnit": "HOURS",
+    "description": "EVC Report Submission SLA: Committee must submit signed report within 24 hours of inspection.",
+    "warningOffsets": [-6, 0],
+    "isStrictStatutoryCutoff": true
+  },
+  "evidenceRequirements": [
+    "SIGNED_JOINT_EVC_REPORT",
+    "GEOTAGGED_PHOTOS_ZIP",
+    "VIDEO_PROCEEDINGS_LINK",
+    "EVC_DEFICIENCY_STATEMENT"
+  ],
+  "exitConditions": [
+    {
+      "code": "EXIT_EVC_REPORT_SUBMITTED",
+      "description": "Signed joint EVC report recorded in evc_reports table.",
+      "verificationCriteria": [
+        "evc_report record exists with review_status in ['RECOMMENDED_APPROVAL', 'RECOMMENDED_DEFICIENCY']"
+      ]
+    }
+  ]
+}

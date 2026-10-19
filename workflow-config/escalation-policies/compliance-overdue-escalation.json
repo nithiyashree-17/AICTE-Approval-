@@ -1,0 +1,29 @@
+{
+  "policyKey": "COMPLIANCE_OVERDUE_ESCALATION",
+  "name": "Institutional Compliance Overdue Escalation",
+  "description": "Multi-tier escalation policy for unfulfilled institutional compliance undertakings (faculty roster, endowment deposit, lab equipment upgrades).",
+  "aphClauseCitation": "APH Chapter II Cl. 2.18",
+  "triggerStageOrEvent": "COMPLIANCE_OVERDUE",
+  "monitoredDeadlines": ["COMPLIANCE_OBLIGATION_DUE_DATE"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 2,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 1: 2 days overdue. System marks obligation as OVERDUE and issues formal Show Cause Notice to institution.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Issue Show Cause Notice with 14-day final cure window.",
+      "systemAction": "SHOW_CAUSE_NOTICE"
+    },
+    {
+      "level": 2,
+      "triggerDelayDaysAfterDeadline": 5,
+      "targetRole": "ROLE_BUREAU_OFFICER",
+      "description": "Level 2: 5 days overdue. Escalated to Central Bureau Head to recommend suspension of EoA or intake freeze.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Initiate penal proceedings for regulatory non-compliance.",
+      "systemAction": "REFER_TO_SHC"
+    }
+  ],
+  "autoResolutionCondition": "Institution uploads compliant evidence and officer verifies obligation as FULFILLED."
+}

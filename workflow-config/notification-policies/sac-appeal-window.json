@@ -1,0 +1,39 @@
+{
+  "policyKey": "SAC_APPEAL_WINDOW_POLICY",
+  "triggerEvent": "APPLICATION_REJECTED_SPEAKING_ORDER_ISSUED",
+  "description": "Statutory notification series tracking the mandatory 7-calendar-day appeal window under APH Clause 2.24(a). Alerts institution daily or at critical milestones before appeal limitation expires.",
+  "aphClauseCitation": "APH Chapter II Cl. 2.24(a)",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "DAY_1_IMMEDIATE",
+      "description": "Notice of Rejection and activation of 7-Day Appeal Window."
+    },
+    {
+      "offsetDays": 3,
+      "label": "DAY_4_REMINDER",
+      "description": "3 calendar days remaining to lodge SAC appeal."
+    },
+    {
+      "offsetDays": 6,
+      "label": "DAY_7_FINAL_NOTICE",
+      "description": "24 hours remaining before statutory appeal window expires permanently."
+    }
+  ],
+  "templates": {
+    "subject": "CRITICAL: AICTE Speaking Order of Rejection & 7-Day Appeal Window for {{applicationNumber}}",
+    "inAppTitle": "Adverse Decision Uploaded - 7-Day SAC Appeal Window Active",
+    "inAppBodyTemplate": "Executive Committee has uploaded a speaking order of rejection for {{applicationNumber}}. Statutory appeal under Cl. 2.24(a) must be filed by {{appealDeadline}}.",
+    "emailSubjectTemplate": "AICTE Statutory Notice: Speaking Order & 7-Day Appeal Window - {{applicationNumber}}",
+    "emailHtmlTemplate": "<p>Attention Chairman / Secretary,</p><p>A Speaking Order regarding application <strong>{{applicationNumber}}</strong> has been uploaded to the AICTE portal.</p><p>Under <strong>APH Clause 2.24(a)</strong>, you may appeal once to the Council strictly within <strong>seven calendar days</strong> from the date of upload.</p><p>Appeal Window Cutoff: <strong>{{appealDeadline}}</strong> (23:59:59 UTC).</p><p>After this deadline, the case is permanently time-barred from administrative appeal.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "caseMustBeInStages": ["CLOSED_REJECTED"],
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{caseId}:SAC_APPEAL_WINDOW:{offset}:{recipientId}"
+}

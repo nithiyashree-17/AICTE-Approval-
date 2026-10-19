@@ -1,0 +1,29 @@
+{
+  "policyKey": "DOCUMENT_EXPIRY_ESCALATION",
+  "name": "Expired Document / Lease Failure Escalation",
+  "description": "Escalation policy when registered lease deed, Fire Safety NOC, or Building Safety Certificate expires without an approved renewed replacement.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.10 & Chapter II Cl. 2.18",
+  "triggerStageOrEvent": "DOCUMENT_EXPIRED",
+  "monitoredDeadlines": ["DOCUMENT_VALID_TO_DATE"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 0,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 1: Expiration date reached (T-0). Document status auto-switches to EXPIRED. Mandatory Show Cause notice dispatched to Institution.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Issue Show Cause notice for operating with expired safety/lease certificate.",
+      "systemAction": "SHOW_CAUSE_NOTICE"
+    },
+    {
+      "level": 2,
+      "triggerDelayDaysAfterDeadline": 14,
+      "targetRole": "ROLE_BUREAU_OFFICER",
+      "description": "Level 2: 14 days post-expiration without renewed document. Placed before Standing Hearing Committee to recommend withdrawal of approval.",
+      "notificationPolicyKey": "HEARING_SUMMONS_NOTIFICATION",
+      "actionRequired": "Docket institution for punitive regulatory hearing.",
+      "systemAction": "REFER_TO_SHC"
+    }
+  ],
+  "autoResolutionCondition": "Institution uploads renewed certified document and officer verifies validity."
+}
