@@ -1,0 +1,82 @@
+{
+  "key": "DECISION_PENDING",
+  "displayName": "Statutory Decision Pending (Council / EC)",
+  "description": "Final determination stage before the Competent Authority (AICTE Council / Executive Committee). Statutory Safeguard: Decision can ONLY be taken by an authenticated human officer with ROLE_COMPETENT_AUTHORITY. AI decisions are strictly prohibited.",
+  "ownerRole": "ROLE_COMPETENT_AUTHORITY",
+  "permittedRoles": ["ROLE_COMPETENT_AUTHORITY", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.11, 1.12 & Chapter II Cl. 2.22 - 2.24",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_DOSSIER_COMPLETE",
+      "description": "Case must have completed all mandatory stages (Scrutiny, EVC, or Hearing) according to active template."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "GRANT_APPROVAL",
+      "targetStage": "CLOSED_APPROVED",
+      "buttonLabel": "Issue Statutory Approval (LoA / EoA)",
+      "authorizedRoles": ["ROLE_COMPETENT_AUTHORITY"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": ["SIGNED_STATUTORY_APPROVAL_ORDER"],
+      "aphRuleCitation": "RULE-NEW-007 / Chap I Cl. 1.11",
+      "validationRules": [
+        "Transition MUST NOT be initiated by AI agent or automated trigger",
+        "Signed Letter of Approval (LoA) or Extension of Approval (EoA) order must be uploaded",
+        "Approved intake quotas per program must be explicitly confirmed",
+        "Cryptographic digital signature of Member Secretary / Council Authority verified"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "APPLICATION_APPROVED_LOA_ISSUED",
+        "triggerNotificationPolicy": "DECISION_RECORDED_APPROVAL_NOTICE",
+        "registerComplianceObligations": true
+      }
+    },
+    {
+      "transitionName": "ISSUE_REJECTION",
+      "targetStage": "CLOSED_REJECTED",
+      "buttonLabel": "Issue Speaking Order of Rejection",
+      "authorizedRoles": ["ROLE_COMPETENT_AUTHORITY"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": ["SIGNED_SPEAKING_ORDER_OF_REJECTION"],
+      "aphRuleCitation": "RULE-SAC-001 / Chap II Cl. 2.24(a)",
+      "validationRules": [
+        "Transition MUST NOT be initiated by AI agent or automated trigger",
+        "Speaking Order stating explicit statutory grounds of refusal under APH must be uploaded",
+        "Statutory 7-calendar-day SAC appeal timer must be initiated upon upload timestamp"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "APPLICATION_REJECTED_SPEAKING_ORDER_ISSUED",
+        "triggerNotificationPolicy": "DECISION_RECORDED_REJECTION_NOTICE",
+        "startTimerPolicy": "SAC_APPEAL_LIMITATION_WINDOW"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "STATUTORY",
+    "durationValue": 15,
+    "durationUnit": "CALENDAR_DAYS",
+    "description": "Council Calendar SLA: Statutory determination in aligned Executive Committee session.",
+    "warningOffsets": [-5, -2, 0],
+    "isStrictStatutoryCutoff": false
+  },
+  "evidenceRequirements": [
+    "SIGNED_STATUTORY_APPROVAL_ORDER",
+    "SIGNED_SPEAKING_ORDER_OF_REJECTION",
+    "COUNCIL_MINUTES_EXTRACT"
+  ],
+  "exitConditions": [
+    {
+      "code": "EXIT_STATUTORY_ORDER_ISSUED",
+      "description": "Official speaking order or approval letter uploaded by human Competent Authority.",
+      "verificationCriteria": [
+        "decision_uploaded_at is not null",
+        "final_decision in ['APPROVED', 'REJECTED']",
+        "decided_by_user_id has ROLE_COMPETENT_AUTHORITY"
+      ]
+    }
+  ]
+}

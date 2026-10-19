@@ -1,0 +1,29 @@
+{
+  "policyKey": "DEFICIENCY_RESPONSE_ESCALATION",
+  "name": "Deficiency Non-Response Multi-Tier Escalation",
+  "description": "Multi-tier escalation policy triggered when an applicant institution fails to submit rectified documents within the 7-day cure window.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.7 & Chapter II Cl. 2.19",
+  "triggerStageOrEvent": "DEFICIENCY_RESPONSE",
+  "monitoredDeadlines": ["DEFICIENCY_CURE_PERIOD"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 2,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 1: 2 days overdue. System marks case as DELINQUENT and dispatches formal warning notice to Institution Chairman and Regional Officer.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Issue urgent administrative delinquency warning.",
+      "systemAction": "SHOW_CAUSE_NOTICE"
+    },
+    {
+      "level": 2,
+      "triggerDelayDaysAfterDeadline": 5,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 2: 5 days overdue. Automatic referral to Standing Hearing Committee (SHC) for default adverse determination.",
+      "notificationPolicyKey": "HEARING_SUMMONS_NOTIFICATION",
+      "actionRequired": "Docket case on SHC hearing roster.",
+      "systemAction": "REFER_TO_SHC"
+    }
+  ],
+  "autoResolutionCondition": "Institution submits complete rectification package or case transitions to HEARING_OR_COMMITTEE_REVIEW."
+}

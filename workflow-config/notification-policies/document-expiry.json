@@ -1,0 +1,48 @@
+{
+  "policyKey": "DOCUMENT_EXPIRY_WARNING_POLICY",
+  "triggerEvent": "DOCUMENT_VALIDITY_MONITORING",
+  "description": "Monitors validity of registered land lease deeds, Fire NOCs, Building Safety certificates, and NBA accreditations, alerting the institution and Regional Officer before expiration.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.10 & Chapter II Cl. 2.18",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": -180,
+      "label": "T_MINUS_180D",
+      "description": "Six-month advance renewal advisory."
+    },
+    {
+      "offsetDays": -90,
+      "label": "T_MINUS_90D",
+      "description": "Three-month renewal reminder."
+    },
+    {
+      "offsetDays": -30,
+      "label": "T_MINUS_30D",
+      "description": "One-month critical renewal warning."
+    },
+    {
+      "offsetDays": -7,
+      "label": "T_MINUS_7D",
+      "description": "Seven-day urgent alert before expiration."
+    },
+    {
+      "offsetDays": 0,
+      "label": "EXPIRY_DATE",
+      "description": "Document expired notification."
+    }
+  ],
+  "templates": {
+    "subject": "URGENT: Document Validity Expiry Alert - {{documentType}} for {{institutionName}}",
+    "inAppTitle": "Statutory Document Expiring Soon",
+    "inAppBodyTemplate": "{{documentType}} registered for {{institutionName}} expires on {{validToDate}}. Upload renewed registered copy.",
+    "emailSubjectTemplate": "AICTE Document Validity Alert: {{documentType}} Expiring on {{validToDate}}",
+    "emailHtmlTemplate": "<p>Attention Principal / Director,</p><p>The registered document <strong>{{documentType}}</strong> for <strong>{{institutionName}}</strong> is scheduled to expire on <strong>{{validToDate}}</strong>.</p><p>As per AICTE Approval Process Handbook regulations, institution premises must maintain continuous validity of land leases and safety NOCs.</p><p>Upload the renewed certified copy through the Compliance portal.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{documentId}:DOCUMENT_EXPIRY:{offset}:{recipientId}"
+}

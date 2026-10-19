@@ -1,0 +1,44 @@
+{
+  "policyKey": "DEFICIENCY_ISSUED_INSTITUTION_ALERT",
+  "triggerEvent": "DEFICIENCIES_ISSUED",
+  "description": "Notifies the institution of itemized deficiencies flagged during scrutiny, providing remediation instructions and automated reminders leading up to the 7-day cutoff.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.7",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate dispatch of itemized deficiency notice."
+    },
+    {
+      "offsetDays": -3,
+      "label": "REMINDER_T_MINUS_3D",
+      "description": "Urgent reminder 3 days prior to deficiency cure cutoff."
+    },
+    {
+      "offsetDays": -1,
+      "label": "REMINDER_T_MINUS_1D",
+      "description": "Critical final reminder 24 hours prior to deficiency cure cutoff."
+    },
+    {
+      "offsetDays": 0,
+      "label": "DUE_DATE_CUTOFF",
+      "description": "Notification dispatched on the due date."
+    }
+  ],
+  "templates": {
+    "subject": "CRITICAL: Deficiency Notice Issued for AICTE Application {{applicationNumber}}",
+    "inAppTitle": "Deficiencies Flagged - Action Required Within 7 Days",
+    "inAppBodyTemplate": "Scrutiny Officer has flagged {{deficiencyCount}} itemized deficiencies for {{institutionName}} ({{applicationNumber}}). Cure deadline is {{deficiencyDueDate}}.",
+    "emailSubjectTemplate": "AICTE Deficiency Notice: {{applicationNumber}} - Rectification Required by {{deficiencyDueDate}}",
+    "emailHtmlTemplate": "<p>Dear Applicant,</p><p>Deficiencies have been identified in your application <strong>{{applicationNumber}}</strong>.</p><p>Summary of Deficiencies: {{deficienciesSummary}}</p><p>You must upload rectified certified documents by <strong>{{deficiencyDueDate}}</strong> (23:59:59 UTC).</p><p>Failure to respond within 7 calendar days will result in matter referral to Standing Hearing Committee.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "caseMustBeInStages": ["DEFICIENCY_RESPONSE"],
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{caseId}:DEFICIENCY_ISSUED_INSTITUTION_ALERT:{offset}:{recipientId}"
+}

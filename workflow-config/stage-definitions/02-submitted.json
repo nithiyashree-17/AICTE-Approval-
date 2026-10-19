@@ -1,0 +1,70 @@
+{
+  "key": "SUBMITTED",
+  "displayName": "Submitted / Intake Queue",
+  "description": "Application successfully recorded. Regional Office conducts intake checks and assigns the case to an authorized Scrutiny Officer within regional jurisdiction.",
+  "ownerRole": "ROLE_REGIONAL_OFFICER",
+  "permittedRoles": ["ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER", "ROLE_INSTITUTION", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.5 & Chapter II Table 2.3",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_SUBMISSION_EXISTS",
+      "description": "Application successfully transitioned from DRAFT with valid receipt timestamp."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "ASSIGN_SCRUTINY",
+      "targetStage": "SCRUTINY",
+      "buttonLabel": "Assign to Scrutiny Officer",
+      "authorizedRoles": ["ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER"],
+      "requiresEvidence": false,
+      "requiresReason": false,
+      "aphRuleCitation": "RULE-NEW-002 / Chap I Cl. 1.5",
+      "validationRules": [
+        "Assigned Scrutiny Officer must be active and within same regional scope",
+        "Assigned officer must not have a flagged institutional conflict of interest"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "CASE_ASSIGNED_TO_SCRUTINY",
+        "triggerNotificationPolicy": "CASE_ASSIGNED_OFFICER_ALERT",
+        "startTimerPolicy": "SCRUTINY_EXECUTION_SLA"
+      }
+    },
+    {
+      "transitionName": "FAST_TRACK_ROUTINE_EOA",
+      "targetStage": "DECISION_PENDING",
+      "buttonLabel": "Approve Self-Disclosure & Forward for EoA",
+      "authorizedRoles": ["ROLE_REGIONAL_OFFICER"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "aphRuleCitation": "RULE-EOA-002 / Chap II Cl. 2.4",
+      "validationRules": [
+        "Allowed only for ROUTINE_EOA workflow",
+        "Institution must possess clean compliance record and NBA accreditation without adverse reports"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "ROUTINE_EOA_CLEARED_INTAKE",
+        "triggerNotificationPolicy": "DECISION_PENDING_NOTIFICATION"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 3,
+    "durationUnit": "WORKING_DAYS",
+    "description": "Intake assignment SLA: Case must be assigned to Scrutiny Officer within 3 business days.",
+    "warningOffsets": [-1, 0],
+    "isStrictStatutoryCutoff": false
+  },
+  "evidenceRequirements": ["SUBMISSION_RECEIPT", "PAYMENT_CONFIRMATION_SLIP"],
+  "exitConditions": [
+    {
+      "code": "EXIT_ASSIGNED_OR_FAST_TRACKED",
+      "description": "Scrutiny Officer is assigned or eligible routine case fast-tracked to decision.",
+      "verificationCriteria": [
+        "assigned_scrutiny_officer_id is not null"
+      ]
+    }
+  ]
+}

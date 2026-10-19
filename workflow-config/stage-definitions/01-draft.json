@@ -1,0 +1,72 @@
+{
+  "key": "DRAFT",
+  "displayName": "Application Draft",
+  "description": "Initial draft preparation stage where the institution fills statutory data, uploads land/infrastructure documents, and compiles mandatory evidence.",
+  "ownerRole": "ROLE_INSTITUTION",
+  "permittedRoles": ["ROLE_INSTITUTION", "ROLE_AUDITOR", "ROLE_SYSTEM_ADMIN"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.3 & Chapter II Cl. 2.1",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_INST_AUTH",
+      "description": "Applicant user must belong to a verified institution entity with valid email and phone verification.",
+      "requiredRole": "ROLE_INSTITUTION"
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "SUBMIT_APPLICATION",
+      "targetStage": "SUBMITTED",
+      "buttonLabel": "Submit Application to Council",
+      "authorizedRoles": ["ROLE_INSTITUTION"],
+      "requiresEvidence": true,
+      "requiresReason": false,
+      "requiredEvidenceTypes": [
+        "LAND_REGISTERED_DEED",
+        "MUNICIPAL_LAND_USE_CERT",
+        "FIRE_SAFETY_NOC",
+        "BUILDING_PLAN_APPROVAL",
+        "TRUST_SOCIETY_REGISTRATION",
+        "AICTE_PROCESSING_FEE_RECEIPT"
+      ],
+      "aphRuleCitation": "RULE-NEW-001 / Chap I, Cl. 1.3-1.5",
+      "validationRules": [
+        "All mandatory institutional and land fields must be filled",
+        "100% of mandatory document types must have uploaded valid files",
+        "Processing fee payment transaction must be confirmed",
+        "Applicant digital declaration must be signed"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "APPLICATION_SUBMITTED",
+        "triggerNotificationPolicy": "APPLICATION_SUBMITTED_RECEIPT",
+        "startTimerPolicy": "INTAKE_ASSIGNMENT_SLA"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 30,
+    "durationUnit": "CALENDAR_DAYS",
+    "description": "Draft must be completed within portal submission window specified in annual calendar.",
+    "warningOffsets": [-7, -3, 0],
+    "isStrictStatutoryCutoff": true
+  },
+  "evidenceRequirements": [
+    "LAND_REGISTERED_DEED",
+    "MUNICIPAL_LAND_USE_CERT",
+    "FIRE_SAFETY_NOC",
+    "BUILDING_PLAN_APPROVAL",
+    "TRUST_SOCIETY_REGISTRATION",
+    "AICTE_PROCESSING_FEE_RECEIPT"
+  ],
+  "exitConditions": [
+    {
+      "code": "EXIT_DRAFT_SUBMITTED",
+      "description": "Application transitioned to SUBMITTED state with cryptographic digest and confirmation receipt issued.",
+      "verificationCriteria": [
+        "Mandatory documents count matches template requirement",
+        "Payment status is COMPLETED"
+      ]
+    }
+  ]
+}

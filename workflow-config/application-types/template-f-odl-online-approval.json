@@ -1,0 +1,33 @@
+{
+  "key": "TEMPLATE_F_ODL_ONLINE_APPROVAL",
+  "name": "Template F: Open and Distance Learning (ODL) and Online Programs Approval",
+  "version": "1.0.0",
+  "status": "APPROVED",
+  "applicationCategory": "ODL_ONLINE_APPROVAL",
+  "aphSourceReference": "Approval Process Handbook 2024–2027 Chapter VIII",
+  "description": "Approval workflow for institutions offering technical programs via Open and Distance Learning (ODL) or Online mode, requiring compliance with UGC-DEB equivalence and LMS infrastructure.",
+  "initialStage": "DRAFT",
+  "terminalStages": ["CLOSED_APPROVED", "CLOSED_REJECTED"],
+  "allowedStages": [
+    "DRAFT",
+    "SUBMITTED",
+    "SCRUTINY",
+    "DEFICIENCY_RESPONSE",
+    "RE_SCRUTINY",
+    "DECISION_PENDING",
+    "CLOSED_APPROVED",
+    "CLOSED_REJECTED"
+  ],
+  "mandatoryDocumentsOnSubmission": [
+    "NAAC_SCORE_CARD_MIN_3_26",
+    "UGC_DEB_EQUIVALENCE_APPROVAL",
+    "LMS_SECURITY_AND_INFRASTRUCTURE_AUDIT",
+    "SWAYAM_INTEGRATION_READINESS_CERT",
+    "ODL_PROCESSING_FEE_RECEIPT"
+  ],
+  "statutoryConstraints": [
+    "Institution must hold valid NAAC score >= 3.26 or NIRF Top-100 ranking",
+    "LMS data centers must be located within sovereign territory of India",
+    "Maximum intake is governed by AICTE national ODL guidelines"
+  ]
+}

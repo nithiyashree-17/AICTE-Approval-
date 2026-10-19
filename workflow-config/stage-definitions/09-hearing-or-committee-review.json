@@ -1,0 +1,81 @@
+{
+  "key": "HEARING_OR_COMMITTEE_REVIEW",
+  "displayName": "Quasi-Judicial Hearing (SHC / SAC)",
+  "description": "Standing Hearing Committee (SHC) or Standing Appellate Committee (SAC) convenes to hear applicant institutional representatives, review original primary records, and issue statutory recommendations.",
+  "ownerRole": "ROLE_SAC_SHC",
+  "permittedRoles": ["ROLE_SAC_SHC", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER", "ROLE_INSTITUTION", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter II Cl. 2.19 - 2.21 (SHC) & Cl. 2.24(a)-(c) (SAC)",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_HEARING_SUMMONS",
+      "description": "Formal summons issued with itemized discrepancy statement or valid SAC appeal memorandum filed within 7 days."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "RECORD_HEARING_RECOMMENDATION",
+      "targetStage": "DECISION_PENDING",
+      "buttonLabel": "Record Committee Recommendation to Council",
+      "authorizedRoles": ["ROLE_SAC_SHC"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": [
+        "SIGNED_HEARING_MINUTES",
+        "COMMITTEE_FINDINGS_REPORT"
+      ],
+      "aphRuleCitation": "RULE-SHC-002 / Chap II Cl. 2.21 & RULE-SAC-002 / Cl. 2.24(b)",
+      "validationRules": [
+        "Hearing minutes must be signed by committee Chairman (retired High Court Judge / Senior Academician)",
+        "Hearing video recording transcript reference must be recorded",
+        "Clear recommendation (Approval, Rejection, or Reduced Intake) explicitly noted"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "HEARING_RECOMMENDATION_RECORDED",
+        "triggerNotificationPolicy": "DECISION_PENDING_NOTIFICATION"
+      }
+    },
+    {
+      "transitionName": "ORDER_SURPRISE_EVC",
+      "targetStage": "EVC_PENDING",
+      "buttonLabel": "Order Surprise Physical Inspection (EVC)",
+      "authorizedRoles": ["ROLE_SAC_SHC"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": ["SURPRISE_EVC_ORDER_MEMO"],
+      "aphRuleCitation": "RULE-SHC-002 / Chap II Cl. 2.21",
+      "validationRules": [
+        "Allowed only where disputed physical facts cannot be resolved by documents alone",
+        "Formal order memo detailing specific parameters to verify physically must be attached"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "SURPRISE_EVC_ORDERED_BY_HEARING",
+        "triggerNotificationPolicy": "EVC_PENDING_COORDINATOR_ALERT"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 10,
+    "durationUnit": "WORKING_DAYS",
+    "description": "Hearing Disposal SLA: Committee hearing and minutes compilation within 10 working days of docketing.",
+    "warningOffsets": [-3, -1, 0],
+    "isStrictStatutoryCutoff": false
+  },
+  "evidenceRequirements": [
+    "SIGNED_HEARING_MINUTES",
+    "COMMITTEE_FINDINGS_REPORT",
+    "INSTITUTION_WRITTEN_REJOINDER",
+    "HEARING_ATTENDANCE_REGISTER"
+  ],
+  "exitConditions": [
+    {
+      "code": "EXIT_HEARING_RECOMMENDATION_SUBMITTED",
+      "description": "Signed recommendations submitted to the Council / Competent Authority dossier.",
+      "verificationCriteria": [
+        "hearing_minutes_key is not null",
+        "recommendation_outcome in ['RECOMMEND_APPROVAL', 'RECOMMEND_REJECTION', 'ORDER_SURPRISE_EVC']"
+      ]
+    }
+  ]
+}

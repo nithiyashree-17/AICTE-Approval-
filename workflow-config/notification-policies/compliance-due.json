@@ -1,0 +1,48 @@
+{
+  "policyKey": "COMPLIANCE_DUE_REMINDER_POLICY",
+  "triggerEvent": "COMPLIANCE_OBLIGATION_MONITORING",
+  "description": "Monitors open institutional compliance obligations (e.g. endowment fund renewals, barrier-free access audits, faculty recruitments) and triggers alerts at scheduled offsets.",
+  "aphClauseCitation": "APH Chapter II Cl. 2.18",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": -180,
+      "label": "T_MINUS_180D",
+      "description": "Six-month advance compliance advisory."
+    },
+    {
+      "offsetDays": -90,
+      "label": "T_MINUS_90D",
+      "description": "Three-month advance reminder."
+    },
+    {
+      "offsetDays": -30,
+      "label": "T_MINUS_30D",
+      "description": "One-month high-priority reminder."
+    },
+    {
+      "offsetDays": -7,
+      "label": "T_MINUS_7D",
+      "description": "One-week critical alert."
+    },
+    {
+      "offsetDays": 0,
+      "label": "DUE_DATE",
+      "description": "Final due date alert."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: Compliance Obligation Due for {{institutionName}} - {{obligationName}}",
+    "inAppTitle": "Compliance Undertaking Due Soon",
+    "inAppBodyTemplate": "Obligation '{{obligationName}}' is due on {{dueDate}}. Upload verified compliance evidence.",
+    "emailSubjectTemplate": "AICTE Compliance Alert: {{obligationName}} Due on {{dueDate}}",
+    "emailHtmlTemplate": "<p>Institution Administration,</p><p>Your institution <strong>{{institutionName}}</strong> has a pending regulatory undertaking:</p><p><strong>{{obligationName}}</strong></p><p>Due Date: <strong>{{dueDate}}</strong></p><p>Please upload certified compliance documentation before the cutoff date to avoid regulatory sanctions.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{obligationId}:COMPLIANCE_DUE:{offset}:{recipientId}"
+}

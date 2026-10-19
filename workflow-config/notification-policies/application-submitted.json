@@ -1,0 +1,29 @@
+{
+  "policyKey": "APPLICATION_SUBMITTED_RECEIPT",
+  "triggerEvent": "APPLICATION_SUBMITTED",
+  "description": "Dispatches an immediate submission acknowledgment with cryptographic digest to the institution and enqueues an intake assignment event for the Regional Office.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.5",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Triggered immediately upon successful transaction commit."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: Application {{applicationNumber}} Successfully Submitted",
+    "inAppTitle": "Application Submission Confirmed",
+    "inAppBodyTemplate": "Your application {{applicationNumber}} has been formally received on {{submittedAt}}. Official receipt is available for download.",
+    "emailSubjectTemplate": "AICTE Approval Portal - Submission Receipt for {{applicationNumber}}",
+    "emailHtmlTemplate": "<p>Dear Applicant,</p><p>Your application <strong>{{applicationNumber}}</strong> for {{institutionName}} was submitted on {{submittedAt}}.</p><p>Document Digest SHA-256: <code>{{documentDigestSha256}}</code></p><p>Your case is now in the regional intake queue.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": false,
+    "caseMustBeInStages": ["SUBMITTED", "SCRUTINY", "DECISION_PENDING"],
+    "suppressIfResolved": false
+  },
+  "idempotencyKeyPattern": "{caseId}:APPLICATION_SUBMITTED_RECEIPT:{offset}:{recipientId}"
+}

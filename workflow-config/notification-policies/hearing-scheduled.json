@@ -1,0 +1,34 @@
+{
+  "policyKey": "HEARING_SUMMONS_NOTIFICATION",
+  "triggerEvent": "DEFICIENCY_EXPIRED_REFERRED_TO_SHC",
+  "description": "Issues statutory summons to the applicant institution and committee members for an appearance before the Standing Hearing Committee (SHC) or Standing Appellate Committee (SAC) with 5 days advance notice.",
+  "aphClauseCitation": "APH Chapter II Cl. 2.20 & Cl. 2.24(b)",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_SAC_SHC", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate summons dispatch containing discrepancy docket."
+    },
+    {
+      "offsetDays": -2,
+      "label": "REMINDER_T_MINUS_2D",
+      "description": "Hearing attendee checklist confirmation reminder."
+    }
+  ],
+  "templates": {
+    "subject": "SUMMONS: Appearance Before AICTE Standing Hearing / Appellate Committee for {{applicationNumber}}",
+    "inAppTitle": "Statutory Hearing Summons Issued",
+    "inAppBodyTemplate": "Summons issued for {{institutionName}} ({{applicationNumber}}) to appear before the Committee on {{hearingDate}}. Download Itemized Discrepancy Statement.",
+    "emailSubjectTemplate": "AICTE Official Summons: Hearing Docket for {{applicationNumber}} on {{hearingDate}}",
+    "emailHtmlTemplate": "<p>Dear Applicant,</p><p>Notice is hereby given under APH Chapter II that application <strong>{{applicationNumber}}</strong> is listed for hearing before the Committee on <strong>{{hearingDate}}</strong>.</p><p>You are directed to depute authorized representatives along with original primary documents and rejoinder.</p><p>Itemized Discrepancies: {{deficienciesSummary}}</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "caseMustBeInStages": ["HEARING_OR_COMMITTEE_REVIEW"],
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{caseId}:HEARING_SUMMONS_NOTIFICATION:{offset}:{recipientId}"
+}
