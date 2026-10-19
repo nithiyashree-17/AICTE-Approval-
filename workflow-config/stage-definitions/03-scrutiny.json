@@ -1,0 +1,93 @@
+{
+  "key": "SCRUTINY",
+  "displayName": "Scrutiny / Document Verification",
+  "description": "Authorized Scrutiny Officer verifies submitted documents, land titles, building norms, faculty roster, and statutory certificates against APH standards.",
+  "ownerRole": "ROLE_SCRUTINY_OFFICER",
+  "permittedRoles": ["ROLE_SCRUTINY_OFFICER", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.5, 1.6 & Chapter II Table 2.3",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_ASSIGNED_SO",
+      "description": "Case must be assigned to the evaluating Scrutiny Officer.",
+      "requiredRole": "ROLE_SCRUTINY_OFFICER"
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "CLEAR_SCRUTINY_TO_EVC",
+      "targetStage": "EVC_PENDING",
+      "buttonLabel": "Clear Scrutiny & Recommend Physical Inspection (EVC)",
+      "authorizedRoles": ["ROLE_SCRUTINY_OFFICER"],
+      "requiresEvidence": true,
+      "requiresReason": false,
+      "requiredEvidenceTypes": ["SCRUTINY_CLEARANCE_SHEET"],
+      "aphRuleCitation": "RULE-NEW-002 / Chap I Cl. 1.6",
+      "validationRules": [
+        "All scrutiny checklist items must be marked COMPLIANT",
+        "Scrutiny clearance summary sheet signed by officer must be uploaded"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "SCRUTINY_CLEARED_RECOMMENDED_EVC",
+        "triggerNotificationPolicy": "EVC_PENDING_COORDINATOR_ALERT",
+        "startTimerPolicy": "EVC_SCHEDULING_SLA"
+      }
+    },
+    {
+      "transitionName": "CLEAR_SCRUTINY_DIRECT_TO_DECISION",
+      "targetStage": "DECISION_PENDING",
+      "buttonLabel": "Clear Scrutiny & Forward for Approval (EVC Exempt)",
+      "authorizedRoles": ["ROLE_SCRUTINY_OFFICER"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": ["SCRUTINY_CLEARANCE_SHEET"],
+      "aphRuleCitation": "RULE-CHG-002 / Chap II Table 2.3",
+      "validationRules": [
+        "Allowed only where APH explicitly exempts physical inspection (e.g., NBA accredited course addition)",
+        "All scrutiny checklist items must be marked COMPLIANT"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "SCRUTINY_CLEARED_DIRECT_TO_DECISION",
+        "triggerNotificationPolicy": "DECISION_PENDING_NOTIFICATION"
+      }
+    },
+    {
+      "transitionName": "ISSUE_DEFICIENCIES",
+      "targetStage": "DEFICIENCY_RESPONSE",
+      "buttonLabel": "Issue Itemized Deficiency Notice",
+      "authorizedRoles": ["ROLE_SCRUTINY_OFFICER"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": ["DEFICIENCY_MEMO"],
+      "aphRuleCitation": "RULE-NEW-003 / Chap I Cl. 1.7",
+      "validationRules": [
+        "At least 1 itemized deficiency must be logged with clause citation and remediation instructions",
+        "A formal Deficiency Memo must be generated"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "DEFICIENCIES_ISSUED",
+        "triggerNotificationPolicy": "DEFICIENCY_ISSUED_INSTITUTION_ALERT",
+        "startTimerPolicy": "DEFICIENCY_CURE_PERIOD"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 5,
+    "durationUnit": "WORKING_DAYS",
+    "description": "Scrutiny SLA: Scrutiny Officer must complete evaluation within 5 working days of assignment.",
+    "warningOffsets": [-2, -1, 0],
+    "isStrictStatutoryCutoff": false
+  },
+  "evidenceRequirements": ["SCRUTINY_CHECKLIST_REPORT", "DEFICIENCY_MEMO"],
+  "exitConditions": [
+    {
+      "code": "EXIT_SCRUTINY_COMPLETE",
+      "description": "Scrutiny report or deficiency memo recorded.",
+      "verificationCriteria": [
+        "Every document item evaluated as Compliant or Deficient",
+        "Digital signature of Scrutiny Officer captured"
+      ]
+    }
+  ]
+}

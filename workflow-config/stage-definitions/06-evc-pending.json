@@ -1,0 +1,58 @@
+{
+  "key": "EVC_PENDING",
+  "displayName": "EVC Pending Scheduling",
+  "description": "Application cleared scrutiny and is queued for physical / hybrid Expert Visit Committee inspection. EVC Coordinator assigns inspection date and 3-member expert panel.",
+  "ownerRole": "ROLE_EVC_COORDINATOR",
+  "permittedRoles": ["ROLE_EVC_COORDINATOR", "ROLE_REGIONAL_OFFICER", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.9 & Chapter II Table 2.3",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_SCRUTINY_OR_SHC_CLEARANCE",
+      "description": "Case must have cleared SCRUTINY, RE_SCRUTINY, or received a surprise EVC order from SHC."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "SCHEDULE_EVC_INSPECTION",
+      "targetStage": "EVC_SCHEDULED",
+      "buttonLabel": "Confirm EVC Schedule & Roster",
+      "authorizedRoles": ["ROLE_EVC_COORDINATOR"],
+      "requiresEvidence": true,
+      "requiresReason": false,
+      "requiredEvidenceTypes": ["EVC_SCHEDULING_ROSTER_CONFIRMATION"],
+      "aphRuleCitation": "RULE-NEW-005 / Chap I Cl. 1.9",
+      "validationRules": [
+        "Inspection date must be in the future (minimum 3 days notice to institution)",
+        "Minimum 3 qualified experts assigned (Chairman, Subject Expert, Architect/Council Nominee)",
+        "Assigned members must have completed no-conflict-of-interest declarations",
+        "Inspection mode must be specified (PHYSICAL or HYBRID)"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "EVC_SCHEDULED",
+        "triggerNotificationPolicy": "EVC_SCHEDULED_MEMBERS_AND_INSTITUTION",
+        "startTimerPolicy": "EVC_VISIT_CONDUCT_HORIZON"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 7,
+    "durationUnit": "CALENDAR_DAYS",
+    "description": "EVC Scheduling SLA: Coordinator must schedule date and roster within 7 calendar days of queue entry.",
+    "warningOffsets": [-3, -1, 0],
+    "isStrictStatutoryCutoff": false
+  },
+  "evidenceRequirements": ["EVC_ROSTER_SHEET", "CONFLICT_OF_INTEREST_AFFIDAVITS"],
+  "exitConditions": [
+    {
+      "code": "EXIT_EVC_SCHEDULED",
+      "description": "EVC event record created with scheduled_at, mode, location_or_link, and 3 committee_assignments.",
+      "verificationCriteria": [
+        "evc_event_id is not null",
+        "committee_assignments_count >= 3",
+        "scheduled_at > NOW()"
+      ]
+    }
+  ]
+}

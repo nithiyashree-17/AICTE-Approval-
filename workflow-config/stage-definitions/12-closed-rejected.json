@@ -1,0 +1,82 @@
+{
+  "key": "CLOSED_REJECTED",
+  "displayName": "Closed - Rejected (Subject to 7-Day SAC Appeal)",
+  "description": "Adverse Decision Stage: Application refused by Executive Committee. Statutory Clause 2.24(a) allows applicant to appeal once to Council within strictly 7 calendar days of decision upload.",
+  "ownerRole": "ROLE_COMPETENT_AUTHORITY",
+  "permittedRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER", "ROLE_COMPETENT_AUTHORITY", "ROLE_SAC_SHC", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter II Cl. 2.24(a), (b), (c)",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_REJECTION_ORDER_UPLOADED",
+      "description": "Speaking Order of Rejection uploaded with timestamp."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "FILE_SAC_APPEAL",
+      "targetStage": "HEARING_OR_COMMITTEE_REVIEW",
+      "buttonLabel": "File Statutory Appeal to SAC (Within 7 Days)",
+      "authorizedRoles": ["ROLE_INSTITUTION"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": [
+        "SAC_APPEAL_MEMORANDUM",
+        "APPEAL_FEE_RECEIPT",
+        "REBUTTAL_DOCUMENTATION"
+      ],
+      "aphRuleCitation": "RULE-SAC-001 / Chap II Cl. 2.24(a)",
+      "validationRules": [
+        "Appeal must be submitted within strictly 7 calendar days of decision upload (NOW() <= decision_uploaded_at + 7 days at 23:59:59 UTC)",
+        "Proof of payment of statutory appeal fee must be attached",
+        "Grounds of appeal and point-by-point rebuttal must be submitted"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "SAC_APPEAL_FILED",
+        "triggerNotificationPolicy": "HEARING_SUMMONS_NOTIFICATION",
+        "cancelExistingTimers": true
+      }
+    },
+    {
+      "transitionName": "EXPIRE_APPEAL_WINDOW_LOCK",
+      "targetStage": "CLOSED_REJECTED",
+      "buttonLabel": "Lock Case (Appeal Limitation Expired)",
+      "authorizedRoles": ["ROLE_SYSTEM_ADMIN", "ROLE_COMPETENT_AUTHORITY"],
+      "requiresEvidence": false,
+      "requiresReason": true,
+      "aphRuleCitation": "RULE-SAC-001 / Chap II Cl. 2.24(a)",
+      "validationRules": [
+        "7 calendar days elapsed since decision upload timestamp without appeal submission",
+        "Administrative appeal rights permanently barred by limitation"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "SAC_APPEAL_WINDOW_EXPIRED",
+        "triggerNotificationPolicy": "SAC_APPEAL_EXPIRED_NOTIFICATION",
+        "triggerEscalationPolicy": "SAC_APPEAL_EXPIRATION_ESCALATION"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "STATUTORY",
+    "durationValue": 7,
+    "durationUnit": "CALENDAR_DAYS",
+    "aphClauseCitation": "APH Chapter II Clause 2.24(a)",
+    "description": "Statutory Appeal Limitation: Aggrieved applicant may appeal once to Council within exactly 7 calendar days from portal upload date.",
+    "warningOffsets": [-6, -3, -1, 0],
+    "isStrictStatutoryCutoff": true
+  },
+  "evidenceRequirements": [
+    "SIGNED_SPEAKING_ORDER_OF_REJECTION",
+    "SAC_APPEAL_MEMORANDUM",
+    "APPEAL_FEE_RECEIPT"
+  ],
+  "exitConditions": [
+    {
+      "code": "EXIT_APPEAL_FILED_OR_BARRED",
+      "description": "Appeal filed in time or case permanently barred by limitation.",
+      "verificationCriteria": [
+        "appeal_filed_at is not null or appeal_exhausted == true"
+      ]
+    }
+  ]
+}

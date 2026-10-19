@@ -1,0 +1,29 @@
+{
+  "policyKey": "EVC_REPORT_ESCALATION",
+  "name": "EVC Inspection Report Submission Delinquency Escalation",
+  "description": "Escalates overdue submission of joint inspection report after physical campus inspection is concluded.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.10",
+  "triggerStageOrEvent": "EVC_REVIEW",
+  "monitoredDeadlines": ["EVC_REPORT_SUBMISSION_SLA"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 1,
+      "targetRole": "ROLE_EVC_COORDINATOR",
+      "description": "Level 1: 24 hours overdue past visit completion. Coordinator calls committee chairman to upload report immediately.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Contact committee chairman to expedite signed report upload.",
+      "systemAction": "SUPERVISOR_ALERT"
+    },
+    {
+      "level": 2,
+      "triggerDelayDaysAfterDeadline": 2,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 2: 48 hours overdue. Formal escalation to Regional Officer and Member Secretary. Inspection panel flagged.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Notify Member Secretary of committee delinquency.",
+      "systemAction": "SUPERVISOR_ALERT"
+    }
+  ],
+  "autoResolutionCondition": "Signed EVC joint report uploaded and verified."
+}

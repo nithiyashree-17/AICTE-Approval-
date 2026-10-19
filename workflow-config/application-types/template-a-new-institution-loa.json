@@ -1,0 +1,40 @@
+{
+  "key": "TEMPLATE_A_NEW_INSTITUTION_LOA",
+  "name": "Template A: New Technical Institution / Letter of Approval (LoA)",
+  "version": "1.0.0",
+  "status": "APPROVED",
+  "applicationCategory": "NEW_INSTITUTION",
+  "aphSourceReference": "Approval Process Handbook 2024–2027 Chapter I, Clauses 1.1 to 1.12",
+  "description": "Comprehensive regulatory pathway for granting Letter of Approval (LoA) to newly established technical institutions. Mandates 100% document scrutiny, physical Expert Visit Committee (EVC) verification, and Council approval.",
+  "initialStage": "DRAFT",
+  "terminalStages": ["CLOSED_APPROVED", "CLOSED_REJECTED"],
+  "allowedStages": [
+    "DRAFT",
+    "SUBMITTED",
+    "SCRUTINY",
+    "DEFICIENCY_RESPONSE",
+    "RE_SCRUTINY",
+    "EVC_PENDING",
+    "EVC_SCHEDULED",
+    "EVC_REVIEW",
+    "HEARING_OR_COMMITTEE_REVIEW",
+    "DECISION_PENDING",
+    "CLOSED_APPROVED",
+    "CLOSED_REJECTED"
+  ],
+  "mandatoryDocumentsOnSubmission": [
+    "LAND_REGISTERED_DEED",
+    "MUNICIPAL_LAND_USE_CERT",
+    "FIRE_SAFETY_NOC",
+    "BUILDING_PLAN_APPROVAL",
+    "TRUST_SOCIETY_REGISTRATION",
+    "DETAILED_PROJECT_REPORT",
+    "AICTE_PROCESSING_FEE_RECEIPT"
+  ],
+  "statutoryConstraints": [
+    "Registered lease must meet minimum 30-year unexpired duration as per Clause 1.10",
+    "Physical EVC inspection is non-waivable for all new institutions",
+    "Statutory decision must be signed by Member Secretary / Council Authority",
+    "Speaking order of rejection triggers statutory 7-day SAC appeal window under Clause 2.24(a)"
+  ]
+}

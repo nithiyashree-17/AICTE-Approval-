@@ -1,0 +1,28 @@
+{
+  "policyKey": "EVIDENCE_VERIFIED_CONFIRMATION",
+  "triggerEvent": "COMPLIANCE_EVIDENCE_VERIFIED",
+  "description": "Notifies the institution that their submitted compliance document / lease renewal was verified by the Regional Officer, marks obligation FULFILLED, and cancels future reminders.",
+  "aphClauseCitation": "APH Chapter II Cl. 2.18",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate confirmation on officer verification."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: Compliance Obligation Fulfilled for {{obligationName}}",
+    "inAppTitle": "Compliance Evidence Verified & Accepted",
+    "inAppBodyTemplate": "Your submission for '{{obligationName}}' has been verified and approved by the Regional Office. Obligation is now closed.",
+    "emailSubjectTemplate": "AICTE Compliance Verified: {{obligationName}} - {{institutionName}}",
+    "emailHtmlTemplate": "<p>Institution Administration,</p><p>We are pleased to inform you that your compliance submission for <strong>{{obligationName}}</strong> has been verified by the authorized officer.</p><p>Verification Status: <strong>VERIFIED</strong></p><p>All remaining scheduled reminders for this obligation have been suppressed.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": false,
+    "suppressIfResolved": false
+  },
+  "idempotencyKeyPattern": "{obligationId}:EVIDENCE_VERIFIED_CONFIRMATION:{offset}:{recipientId}"
+}

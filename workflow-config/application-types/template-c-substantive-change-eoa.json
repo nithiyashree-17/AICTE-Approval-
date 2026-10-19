@@ -1,0 +1,38 @@
+{
+  "key": "TEMPLATE_C_SUBSTANTIVE_CHANGE_EOA",
+  "name": "Template C: Extension of Approval with Substantive Changes",
+  "version": "1.0.0",
+  "status": "APPROVED",
+  "applicationCategory": "SUBSTANTIVE_CHANGE_EOA",
+  "aphSourceReference": "Approval Process Handbook 2024–2027 Chapter II, Clauses 2.5 to 2.14 & Table 2.3",
+  "description": "Approval workflow for existing institutions applying for substantive alterations: Intake Increase, Introduction of New Program/Course, Change of Site, Division Addition, or Change of Name. Governed dynamically by Table 2.3 provisions.",
+  "initialStage": "DRAFT",
+  "terminalStages": ["CLOSED_APPROVED", "CLOSED_REJECTED"],
+  "allowedStages": [
+    "DRAFT",
+    "SUBMITTED",
+    "SCRUTINY",
+    "DEFICIENCY_RESPONSE",
+    "RE_SCRUTINY",
+    "EVC_PENDING",
+    "EVC_SCHEDULED",
+    "EVC_REVIEW",
+    "HEARING_OR_COMMITTEE_REVIEW",
+    "DECISION_PENDING",
+    "CLOSED_APPROVED",
+    "CLOSED_REJECTED"
+  ],
+  "mandatoryDocumentsOnSubmission": [
+    "RESOLUTION_OF_GOVERNING_BODY",
+    "INFRASTRUCTURE_EXPANSION_BLUEPRINT",
+    "FACULTY_CADRE_COMPLIANCE_ROSTER",
+    "LAND_SURPLUS_VERIFICATION_CERT",
+    "EOA_VARIATION_PROCESSING_FEE_RECEIPT"
+  ],
+  "statutoryConstraints": [
+    "Table 2.3 Row 4 mandates physical EVC for Change of Site / Location",
+    "Table 2.3 Row 3 mandates Scrutiny for Intake Increase, and EVC if institution lacks NBA accreditation",
+    "New courses in emerging technologies requires curriculum concurrence from affiliating university",
+    "Deficiencies not cleared in re-scrutiny automatically route to Standing Hearing Committee (SHC)"
+  ]
+}

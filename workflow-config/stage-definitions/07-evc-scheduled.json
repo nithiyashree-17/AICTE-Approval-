@@ -1,0 +1,69 @@
+{
+  "key": "EVC_SCHEDULED",
+  "displayName": "EVC Inspection Scheduled",
+  "description": "Inspection date and expert committee roster confirmed. Committee conducts physical campus visit, verifies laboratories, library, barrier-free access, and records video proceedings.",
+  "ownerRole": "ROLE_EVC_MEMBER",
+  "permittedRoles": ["ROLE_EVC_MEMBER", "ROLE_EVC_COORDINATOR", "ROLE_REGIONAL_OFFICER", "ROLE_INSTITUTION", "ROLE_AUDITOR"],
+  "isTerminal": false,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.9, 1.10",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_ROSTER_CONFIRMED",
+      "description": "Valid evc_event record exists with assigned committee members."
+    }
+  ],
+  "allowedTransitions": [
+    {
+      "transitionName": "START_EVC_REVIEW",
+      "targetStage": "EVC_REVIEW",
+      "buttonLabel": "Commence Inspection & Prepare Report",
+      "authorizedRoles": ["ROLE_EVC_MEMBER", "ROLE_EVC_COORDINATOR"],
+      "requiresEvidence": false,
+      "requiresReason": false,
+      "aphRuleCitation": "RULE-NEW-006 / Chap I Cl. 1.10",
+      "validationRules": [
+        "Inspection date reached (or within 24 hours prior)",
+        "Executing user must be an assigned member of this specific EVC event"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "EVC_INSPECTION_COMMENCED",
+        "startTimerPolicy": "EVC_REPORT_SUBMISSION_SLA"
+      }
+    },
+    {
+      "transitionName": "RESCHEDULE_EVC",
+      "targetStage": "EVC_PENDING",
+      "buttonLabel": "Reschedule Inspection (Force Majeure)",
+      "authorizedRoles": ["ROLE_EVC_COORDINATOR"],
+      "requiresEvidence": true,
+      "requiresReason": true,
+      "requiredEvidenceTypes": ["RESCHEDULING_JUSTIFICATION_MEMO"],
+      "aphRuleCitation": "RULE-NEW-005 / Chap I Cl. 1.9",
+      "validationRules": [
+        "Valid justification memo explaining emergency, severe weather, or force majeure must be attached"
+      ],
+      "sideEffects": {
+        "createOutboxEvent": "EVC_RESCHEDULED",
+        "triggerNotificationPolicy": "EVC_RESCHEDULED_NOTIFICATION"
+      }
+    }
+  ],
+  "timePolicy": {
+    "type": "PROTOTYPE_POLICY",
+    "durationValue": 10,
+    "durationUnit": "CALENDAR_DAYS",
+    "description": "Visit scheduled horizon.",
+    "warningOffsets": [-2, -1, 0],
+    "isStrictStatutoryCutoff": false
+  },
+  "evidenceRequirements": ["CAMPUS_INSPECTION_VIDEO_URL", "GEOTAGGED_LAB_PHOTOS"],
+  "exitConditions": [
+    {
+      "code": "EXIT_INSPECTION_COMMENCED",
+      "description": "Physical inspection initiated by the appointed committee.",
+      "verificationCriteria": [
+        "Current timestamp is on or after scheduled_at"
+      ]
+    }
+  ]
+}

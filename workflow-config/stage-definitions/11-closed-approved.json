@@ -1,0 +1,18 @@
+{
+  "key": "CLOSED_APPROVED",
+  "displayName": "Closed - Approved (LoA / EoA Issued)",
+  "description": "Terminal State: Application granted statutory approval. Official Letter of Approval or Extension of Approval published on national portal. Active compliance and document validity obligations registered.",
+  "ownerRole": "ROLE_COMPETENT_AUTHORITY",
+  "permittedRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER", "ROLE_COMPETENT_AUTHORITY", "ROLE_AUDITOR"],
+  "isTerminal": true,
+  "aphClauseCitation": "APH 2024-2027 Chapter I Cl. 1.11 & Chapter II Cl. 2.22",
+  "entryPrerequisites": [
+    {
+      "code": "PRE_APPROVAL_GRANTED",
+      "description": "Valid statutory approval order recorded with digital signature."
+    }
+  ],
+  "allowedTransitions": [],
+  "evidenceRequirements": ["SIGNED_STATUTORY_APPROVAL_ORDER"],
+  "exitConditions": []
+}

@@ -1,0 +1,29 @@
+{
+  "policyKey": "CASE_ASSIGNED_OFFICER_ALERT",
+  "triggerEvent": "CASE_ASSIGNED_TO_SCRUTINY",
+  "description": "Alerts the appointed Scrutiny Officer of the new dossier in their queue and notifies the institution of case assignment.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.5",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_SCRUTINY_OFFICER", "ROLE_INSTITUTION"],
+  "recipientScope": "ASSIGNED_OFFICER",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate alert upon regional officer assignment action."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: Application {{applicationNumber}} Assigned to Your Scrutiny Queue",
+    "inAppTitle": "New Application Assigned for Scrutiny",
+    "inAppBodyTemplate": "Case {{applicationNumber}} ({{institutionName}}) has been assigned to you. Evaluation SLA: 5 working days.",
+    "emailSubjectTemplate": "Action Required: Case Assigned {{applicationNumber}}",
+    "emailHtmlTemplate": "<p>Officer,</p><p>Application <strong>{{applicationNumber}}</strong> has been assigned to you for scrutiny.</p><p>Target SLA completion date: <strong>{{slaDueDate}}</strong>.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "caseMustBeInStages": ["SCRUTINY"],
+    "suppressIfResolved": true
+  },
+  "idempotencyKeyPattern": "{caseId}:CASE_ASSIGNED_OFFICER_ALERT:{offset}:{recipientId}"
+}

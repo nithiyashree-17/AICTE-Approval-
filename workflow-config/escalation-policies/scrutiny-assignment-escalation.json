@@ -1,0 +1,29 @@
+{
+  "policyKey": "SCRUTINY_ASSIGNMENT_ESCALATION",
+  "name": "Intake Queue Stalled Assignment Escalation",
+  "description": "Escalates submitted applications that have remained unassigned in the regional intake queue past the SLA limit.",
+  "aphClauseCitation": "Section 11 Reliability & Escalation Requirements",
+  "triggerStageOrEvent": "SUBMITTED",
+  "monitoredDeadlines": ["INTAKE_ASSIGNMENT_SLA"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 1,
+      "targetRole": "ROLE_REGIONAL_OFFICER",
+      "description": "Level 1: Case unassigned 1 day past 3-day SLA. High priority alert to Section Supervisor.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Assign Scrutiny Officer immediately.",
+      "systemAction": "SUPERVISOR_ALERT"
+    },
+    {
+      "level": 2,
+      "triggerDelayDaysAfterDeadline": 3,
+      "targetRole": "ROLE_BUREAU_OFFICER",
+      "description": "Level 2: Case unassigned 3 days past SLA. Escalated to Central Bureau Officer and Regional Director.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Central bureau intervention to reassign regional intake queue.",
+      "systemAction": "SUPERVISOR_ALERT"
+    }
+  ],
+  "autoResolutionCondition": "Application stage moves from SUBMITTED to SCRUTINY with assigned_scrutiny_officer_id populated."
+}

@@ -1,0 +1,29 @@
+{
+  "policyKey": "DEFICIENCY_RESUBMITTED_OFFICER_ALERT",
+  "triggerEvent": "DEFICIENCY_RECTIFICATION_SUBMITTED",
+  "description": "Notifies the assigned Scrutiny Officer that the institution has uploaded rectified evidence and the case is ready for Re-Scrutiny.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.8",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_SCRUTINY_OFFICER", "ROLE_REGIONAL_OFFICER"],
+  "recipientScope": "ASSIGNED_OFFICER",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate dispatch when applicant uploads rectification payload."
+    }
+  ],
+  "templates": {
+    "subject": "AICTE FlowGuard: Rectified Evidence Uploaded for Case {{applicationNumber}}",
+    "inAppTitle": "Rectified Documents Awaiting Re-Scrutiny",
+    "inAppBodyTemplate": "Institution {{institutionName}} has resubmitted evidence for {{applicationNumber}}. Re-scrutiny SLA: 3 working days.",
+    "emailSubjectTemplate": "Action Required: Re-Scrutiny Dossier Ready - {{applicationNumber}}",
+    "emailHtmlTemplate": "<p>Officer,</p><p>Applicant {{institutionName}} has uploaded new versions for all flagged deficiencies under application <strong>{{applicationNumber}}</strong>.</p><p>Please evaluate within 3 working days.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": true,
+    "caseMustBeInStages": ["RE_SCRUTINY"],
+    "suppressIfResolved": false
+  },
+  "idempotencyKeyPattern": "{caseId}:DEFICIENCY_RESUBMITTED_OFFICER_ALERT:{offset}:{recipientId}"
+}

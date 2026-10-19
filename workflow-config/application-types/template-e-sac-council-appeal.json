@@ -1,0 +1,29 @@
+{
+  "key": "TEMPLATE_E_SAC_COUNCIL_APPEAL",
+  "name": "Template E: Standing Appellate Committee (SAC) & Council Appeal Pathway",
+  "version": "1.0.0",
+  "status": "APPROVED",
+  "applicationCategory": "SAC_COUNCIL_APPEAL",
+  "aphSourceReference": "Approval Process Handbook 2024–2027 Chapter II, Clause 2.24(a), (b), (c)",
+  "description": "Statutory appellate workflow available to institutions aggrieved by an Executive Committee rejection order. Strict statutory mandate: appeal must be lodged within 7 calendar days of portal decision upload.",
+  "initialStage": "CLOSED_REJECTED",
+  "terminalStages": ["CLOSED_APPROVED", "CLOSED_REJECTED"],
+  "allowedStages": [
+    "CLOSED_REJECTED",
+    "HEARING_OR_COMMITTEE_REVIEW",
+    "DECISION_PENDING",
+    "CLOSED_APPROVED"
+  ],
+  "mandatoryDocumentsOnSubmission": [
+    "EXECUTIVE_COMMITTEE_REJECTION_SPEAKING_ORDER",
+    "FORMAL_SAC_APPEAL_MEMORANDUM",
+    "PROOF_OF_PAYMENT_APPEAL_FEE",
+    "ITEMIZED_REBUTTAL_WITH_ANNEXURES"
+  ],
+  "statutoryConstraints": [
+    "Strict limitation: Appeal submitted after 7 calendar days (23:59:59 UTC) from rejection upload is time-barred and auto-locked",
+    "Standing Appellate Committee reviews appeal and makes recommendations to Council",
+    "Council considers SAC recommendations and issues final determinative speaking order",
+    "Council decision on appeal is final; no further administrative remedy exists within AICTE"
+  ]
+}

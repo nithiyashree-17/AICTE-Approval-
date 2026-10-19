@@ -1,0 +1,20 @@
+{
+  "policyKey": "SAC_APPEAL_EXPIRATION_ESCALATION",
+  "name": "SAC 7-Day Appeal Limitation Cutoff Escalation",
+  "description": "Statutory escalation executed strictly at the conclusion of 7 calendar days (23:59:59 UTC) from upload of speaking order of rejection under APH Clause 2.24(a). Permanently locks case and extinguishes administrative appeal.",
+  "aphClauseCitation": "APH Chapter II Cl. 2.24(a)",
+  "triggerStageOrEvent": "CLOSED_REJECTED",
+  "monitoredDeadlines": ["SAC_APPEAL_LIMITATION_WINDOW"],
+  "tiers": [
+    {
+      "level": 1,
+      "triggerDelayDaysAfterDeadline": 0,
+      "targetRole": "ROLE_SYSTEM_ADMIN",
+      "description": "Statutory Cutoff: 7 calendar days expired without appeal filing. Case permanently locked from statutory appeal.",
+      "notificationPolicyKey": "DEADLINE_MISSED_ALERT_POLICY",
+      "actionRequired": "Lock case; record statutory forfeiture of administrative appeal.",
+      "systemAction": "AUTO_LOCK_CASE"
+    }
+  ],
+  "autoResolutionCondition": "Appeal filed within 7 calendar days or case permanently locked."
+}

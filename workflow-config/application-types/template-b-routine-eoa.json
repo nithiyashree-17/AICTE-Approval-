@@ -1,0 +1,32 @@
+{
+  "key": "TEMPLATE_B_ROUTINE_EOA",
+  "name": "Template B: Routine Extension of Approval (EoA) - Self-Disclosure Stream",
+  "version": "1.0.0",
+  "status": "APPROVED",
+  "applicationCategory": "ROUTINE_EOA",
+  "aphSourceReference": "Approval Process Handbook 2024–2027 Chapter II, Clause 2.4",
+  "description": "Streamlined approval workflow for accredited, zero-deficiency existing technical institutions seeking annual Extension of Approval based on certified self-disclosure, bypassing physical inspection unless flagged.",
+  "initialStage": "DRAFT",
+  "terminalStages": ["CLOSED_APPROVED", "CLOSED_REJECTED"],
+  "allowedStages": [
+    "DRAFT",
+    "SUBMITTED",
+    "SCRUTINY",
+    "DEFICIENCY_RESPONSE",
+    "RE_SCRUTINY",
+    "DECISION_PENDING",
+    "CLOSED_APPROVED",
+    "CLOSED_REJECTED"
+  ],
+  "mandatoryDocumentsOnSubmission": [
+    "NBA_ACCREDITATION_CERTIFICATE",
+    "ANNUAL_SELF_DISCLOSURE_AFFIDAVIT",
+    "FACULTY_SALARY_BANK_PROOF",
+    "EOA_PROCESSING_FEE_RECEIPT"
+  ],
+  "statutoryConstraints": [
+    "Permitted solely for institutions holding continuous accreditation and zero pending compliance violations",
+    "Random 5% audit sampling may re-route application into full SCRUTINY stage",
+    "No change in site, intake expansion, or new course additions allowed under this routine workflow"
+  ]
+}

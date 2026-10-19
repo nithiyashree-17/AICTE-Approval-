@@ -1,0 +1,29 @@
+{
+  "policyKey": "DECISION_RECORDED_APPROVAL_NOTICE",
+  "triggerEvent": "APPLICATION_APPROVED_LOA_ISSUED",
+  "description": "Formally notifies the institution, regional office, and portal stakeholders that statutory approval has been granted and official order published.",
+  "aphClauseCitation": "APH Chapter I Cl. 1.11 & Chapter II Cl. 2.22",
+  "channels": ["IN_APP", "EMAIL"],
+  "targetRoles": ["ROLE_INSTITUTION", "ROLE_REGIONAL_OFFICER", "ROLE_BUREAU_OFFICER", "ROLE_AUDITOR"],
+  "recipientScope": "INSTITUTION_CONTACTS",
+  "timingOffsets": [
+    {
+      "offsetDays": 0,
+      "label": "IMMEDIATE",
+      "description": "Immediate dispatch on approval order commit."
+    }
+  ],
+  "templates": {
+    "subject": "CONGRATULATIONS: AICTE Approval Granted for {{applicationNumber}}",
+    "inAppTitle": "Letter of Approval (LoA) / EoA Issued",
+    "inAppBodyTemplate": "Your application {{applicationNumber}} has been approved by the Council. Official Approval Letter is now available for download.",
+    "emailSubjectTemplate": "AICTE Approval Order Issued: {{applicationNumber}} - {{institutionName}}",
+    "emailHtmlTemplate": "<p>Dear Principal / Chairman,</p><p>The All India Council for Technical Education has granted statutory approval for <strong>{{institutionName}}</strong> under application <strong>{{applicationNumber}}</strong>.</p><p>Official Order Ref: <strong>{{orderReferenceNumber}}</strong></p><p>Download your authenticated Letter of Approval from the portal.</p>"
+  },
+  "recheckCondition": {
+    "obligationMustBeOpen": false,
+    "caseMustBeInStages": ["CLOSED_APPROVED"],
+    "suppressIfResolved": false
+  },
+  "idempotencyKeyPattern": "{caseId}:DECISION_RECORDED_APPROVAL_NOTICE:{offset}:{recipientId}"
+}
