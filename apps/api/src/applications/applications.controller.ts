@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   Query,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
+import { CaseBriefService } from './case-brief.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { TransitionDto } from './dto/transition.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -24,7 +26,10 @@ import { RoleType } from '../common/enums';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('applications')
 export class ApplicationsController {
-  constructor(private readonly applicationsService: ApplicationsService) {}
+  constructor(
+    private readonly applicationsService: ApplicationsService,
+    private readonly caseBriefService: CaseBriefService,
+  ) {}
 
   @Post()
   @Roles(RoleType.INSTITUTION)
@@ -32,6 +37,17 @@ export class ApplicationsController {
   @ApiResponse({ status: 201, description: 'Application draft created successfully' })
   createDraft(@CurrentUser() user: any, @Body() dto: CreateApplicationDto) {
     return this.applicationsService.createDraft(user.institutionId, user.id, dto);
+  }
+
+  @Patch(':id/draft')
+  @Roles(RoleType.INSTITUTION)
+  @ApiOperation({ summary: 'Auto-save section data while application is in DRAFT stage' })
+  updateDraft(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Body() dto: any,
+  ) {
+    return this.applicationsService.updateDraft(id, user, dto);
   }
 
   @Get()
@@ -73,5 +89,11 @@ export class ApplicationsController {
   @ApiOperation({ summary: 'Get complete chronological stage history for audit' })
   getTimeline(@Param('id') id: string) {
     return this.applicationsService.getTimeline(id);
+  }
+
+  @Get(':id/brief')
+  @ApiOperation({ summary: 'Get AI/Regulatory Case Brief summary with next required action' })
+  getCaseBrief(@Param('id') id: string) {
+    return this.caseBriefService.generateCaseBrief(id);
   }
 }

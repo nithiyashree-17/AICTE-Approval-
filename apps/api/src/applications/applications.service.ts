@@ -52,6 +52,27 @@ export class ApplicationsService {
     return application;
   }
 
+  async updateDraft(id: string, user: any, updateDto: any) {
+    const app = await this.prisma.application.findUnique({ where: { id } });
+    if (!app) {
+      throw new NotFoundException(`Application with ID ${id} not found`);
+    }
+    if (app.institutionId !== user.institutionId) {
+      throw new ForbiddenException("Unauthorized: Cannot modify another institution's application (SEC-01)");
+    }
+    if (app.currentState !== 'DRAFT') {
+      throw new BadRequestException(`Application is in '${app.currentState}' state and can no longer be edited as draft`);
+    }
+
+    return this.prisma.application.update({
+      where: { id },
+      data: {
+        academicYear: updateDto.academicYear || app.academicYear,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
   async findAll(user: any, filters?: { status?: string; region?: string }) {
     const userRoles: RoleType[] = user.roles.map((r: any) => r.role?.name || r.name);
     const where: any = {};

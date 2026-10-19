@@ -26,6 +26,13 @@ export enum DocumentVerificationStatus {
   NEEDS_CORRECTION = 'NEEDS_CORRECTION',
 }
 
+export enum DocumentValidityStatus {
+  VALID = 'VALID',
+  EXPIRING_SOON = 'EXPIRING_SOON',
+  EXPIRED = 'EXPIRED',
+  UNKNOWN = 'UNKNOWN',
+}
+
 export enum EvcMode {
   PHYSICAL = 'PHYSICAL',
   VIRTUAL = 'VIRTUAL',
