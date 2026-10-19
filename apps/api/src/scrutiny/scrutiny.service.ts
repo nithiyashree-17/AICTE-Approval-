@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDeficiencyDto, RespondDeficiencyDto } from './dto/deficiency.dto';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 
 @Injectable()
 export class ScrutinyService {

@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { TransitionDto } from './dto/transition.dto';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 
 @Injectable()
 export class ApplicationsService {

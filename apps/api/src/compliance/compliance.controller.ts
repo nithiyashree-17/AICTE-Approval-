@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 
 @ApiTags('Compliance & Document Obligations')
 @ApiBearerAuth()

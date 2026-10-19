@@ -9,7 +9,10 @@
  * 4. Sample Rule Versions with APH Provenance
  */
 
-import { PrismaClient, RoleType, UserStatus } from '@prisma/client';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+import { PrismaClient, RoleType, UserStatus } from '../apps/api/node_modules/.prisma/client/index.js';
 
 const prisma = new PrismaClient();
 

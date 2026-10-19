@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, ForbiddenException, NotFoundExceptio
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()

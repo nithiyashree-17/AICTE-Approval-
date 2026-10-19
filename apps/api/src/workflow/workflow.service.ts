@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 import { randomUUID } from 'crypto';
 
 export interface TransitionPayload {

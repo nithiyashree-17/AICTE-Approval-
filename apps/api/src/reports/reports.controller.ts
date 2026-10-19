@@ -4,7 +4,7 @@ import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 
 @ApiTags('Reports & Analytics')
 @ApiBearerAuth()

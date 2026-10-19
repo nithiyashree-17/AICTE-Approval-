@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsOptional, IsDateString, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { DocumentVerificationStatus } from '@prisma/client';
+import { DocumentVerificationStatus } from '../../common/enums';
 
 export class CreateObligationDto {
   @ApiProperty({ example: 'Land Lease Deed 30-Year Periodic Verification' })

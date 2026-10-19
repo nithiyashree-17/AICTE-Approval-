@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateObligationDto, SubmitComplianceEvidenceDto, VerifyComplianceDto } from './dto/compliance.dto';
-import { RoleType } from '@prisma/client';
+import { RoleType } from '../common/enums';
 
 @Injectable()
 export class ComplianceService {

@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString, IsArray, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { EvcMode, AssignmentRole } from '@prisma/client';
+import { EvcMode, AssignmentRole } from '../../common/enums';
 
 export class CommitteeMemberAssignmentDto {
   @ApiProperty({ example: 'user-uuid-for-member' })

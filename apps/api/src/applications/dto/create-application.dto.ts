@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ApplicationType } from '@prisma/client';
+import { ApplicationType } from '../../common/enums';
 
 export class CreateApplicationDto {
   @ApiProperty({ enum: ApplicationType, example: ApplicationType.NEW_INSTITUTION_LOA })
