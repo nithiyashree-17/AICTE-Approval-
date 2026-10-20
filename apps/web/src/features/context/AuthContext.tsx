@@ -3,30 +3,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  fullName: string;
-  role: string;
-  primaryRole: string;
-  roles?: string[];
-  institutionId?: string | null;
-  institutionName?: string | null;
-  assignedRegion?: string | null;
-  designation?: string | null;
-}
+export * from './demo-profiles';
+import { AuthUser, DEMO_PROFILES, getRoleHomeDashboard, getRoleLabel } from './demo-profiles';
 
-import { getRoleLandingRoute, ROLE_LABELS, RoleType } from '@flowguard/shared';
-
-export function getRoleHomeDashboard(role?: string): string {
-  return getRoleLandingRoute(role);
-}
-
-export function getRoleLabel(role?: string): string {
-  if (!role) return 'Public User';
-  const normalized = role.toUpperCase() as RoleType;
-  return ROLE_LABELS[normalized] || role;
-}
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -35,6 +14,7 @@ interface AuthContextType {
   roleHome: string;
   setUser: (user: AuthUser | null) => void;
   refreshUser: () => Promise<void>;
+  loginAsDemo: (role: string) => void;
   logout: () => Promise<void>;
 }
 
@@ -77,10 +57,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           designation: data.designation,
         });
       } else {
-        setUser(null);
+        // Fallback to local demo user if stored in localStorage
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('flowguard_demo_user') : null;
+        if (stored) {
+          try {
+            setUser(JSON.parse(stored));
+          } catch {
+            setUser(DEMO_PROFILES.INSTITUTION);
+          }
+        } else {
+          setUser(null);
+        }
       }
     } catch {
-      setUser(null);
+      // In standalone demo mode when backend is offline
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('flowguard_demo_user') : null;
+      if (stored) {
+        try {
+          setUser(JSON.parse(stored));
+        } catch {
+          setUser(DEMO_PROFILES.INSTITUTION);
+        }
+      } else {
+        setUser(DEMO_PROFILES.INSTITUTION);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,6 +90,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
+  const loginAsDemo = (role: string) => {
+    const profile = DEMO_PROFILES[role] || DEMO_PROFILES.INSTITUTION;
+    setUser(profile);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('flowguard_demo_user', JSON.stringify(profile));
+      document.cookie = `flowguard_demo=${profile.primaryRole}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `flowguard_session=demo; path=/; max-age=86400; SameSite=Lax`;
+    }
+    const target = getRoleHomeDashboard(profile.primaryRole);
+    router.push(target);
+  };
+
   const logout = async () => {
     try {
       await fetch(`${API_BASE_URL}/auth/logout`, {
@@ -98,6 +110,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch {
       // ignore
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('flowguard_demo_user');
+      document.cookie = 'flowguard_demo=; path=/; max-age=0';
+      document.cookie = 'flowguard_session=; path=/; max-age=0';
     }
     setUser(null);
     router.push('/login');
@@ -114,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         roleHome,
         setUser,
         refreshUser,
+        loginAsDemo,
         logout,
       }}
     >

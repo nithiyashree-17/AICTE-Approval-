@@ -11,6 +11,10 @@ import {
 } from '@/lib/types';
 import {
   CURRENT_USER,
+  INITIAL_APPLICATIONS,
+  INITIAL_COMPLIANCE,
+  INITIAL_ALERTS,
+  INITIAL_AUDIT_LOGS,
   INITIAL_DOCUMENTS,
 } from '@/lib/mock-data';
 import { api, API_BASE_URL, mapObligationsToComplianceList } from '@/lib/api';
@@ -71,26 +75,26 @@ const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export function DemoProvider({ children }: { children: React.ReactNode }) {
   const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [complianceList, setComplianceList] = useState<ComplianceInstitution[]>([]);
-  const [alerts, setAlerts] = useState<AlertRecord[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
+  const [applications, setApplications] = useState<Application[]>(INITIAL_APPLICATIONS);
+  const [complianceList, setComplianceList] = useState<ComplianceInstitution[]>(INITIAL_COMPLIANCE);
+  const [alerts, setAlerts] = useState<AlertRecord[]>(INITIAL_ALERTS);
+  const [auditLogs, setAuditLogs] = useState<AuditRecord[]>(INITIAL_AUDIT_LOGS);
   const [documents, setDocuments] = useState<DocumentRecord[]>(INITIAL_DOCUMENTS);
 
-  // Derive currentUser strictly from /auth/me
+  // Derive currentUser
   const currentUser: UserSession = {
-    name: authUser?.fullName || 'Authenticated User',
+    name: authUser?.fullName || 'Dr. Ananya Sharma',
     role: (authUser?.primaryRole || 'INSTITUTION') as any,
-    designation: authUser?.designation || authUser?.primaryRole || 'Officer',
-    department: authUser?.institutionName || (authUser?.assignedRegion ? `${authUser.assignedRegion} Region` : 'AICTE HQ'),
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+    designation: authUser?.designation || authUser?.primaryRole || 'Senior Officer',
+    department: authUser?.institutionName || (authUser?.assignedRegion ? `${authUser.assignedRegion} Region` : 'AICTE Headquarters'),
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=160',
   };
 
   // Live Backend / Database state
   const [backendConnected, setBackendConnected] = useState<boolean>(false);
   const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
 
-  // Sync state directly from PostgreSQL via Backend API
+  // Sync state directly from PostgreSQL if Backend API is running
   const syncWithBackend = useCallback(async () => {
     setIsLiveLoading(true);
     try {
@@ -106,12 +110,14 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       // 2. Fetch applications from PostgreSQL
       try {
         const liveApps = await api.applications.getAll();
-        setApplications(liveApps || []);
+        if (Array.isArray(liveApps) && liveApps.length > 0) {
+          setApplications(liveApps);
+        }
       } catch (appErr) {
         console.warn('Could not fetch live applications from database:', appErr);
       }
 
-      // 3. Fetch workflow stages from PostgreSQL (only after auth is ready)
+      // 3. Fetch workflow stages from PostgreSQL
       try {
         await api.workflow.getStages();
       } catch (stageErr) {
@@ -121,8 +127,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       // 4. Fetch compliance obligations from PostgreSQL
       try {
         const rawObligations = await api.compliance.getObligations();
-        const mappedCompliance = mapObligationsToComplianceList(rawObligations);
-        setComplianceList(mappedCompliance);
+        if (Array.isArray(rawObligations) && rawObligations.length > 0) {
+          const mappedCompliance = mapObligationsToComplianceList(rawObligations);
+          setComplianceList(mappedCompliance);
+        }
       } catch (compErr) {
         console.warn('Could not fetch compliance obligations from database:', compErr);
       }
@@ -130,7 +138,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       // 5. Fetch notifications from PostgreSQL
       try {
         const notifRes = await api.notifications.getAll();
-        if (notifRes && notifRes.notifications) {
+        if (notifRes && notifRes.notifications && notifRes.notifications.length > 0) {
           const mappedAlerts: AlertRecord[] = notifRes.notifications.map((n) => ({
             id: n.id,
             severity: n.templateKey?.includes('WARNING') ? 'High' : 'Medium',
@@ -147,7 +155,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       // 6. Fetch audit logs from PostgreSQL
       try {
         const auditRes = await api.audit.getLogs({ take: 50 });
-        if (auditRes && auditRes.logs) {
+        if (auditRes && auditRes.logs && auditRes.logs.length > 0) {
           const mappedLogs: AuditRecord[] = auditRes.logs.map((l) => ({
             id: l.id.slice(0, 8),
             timestamp: l.createdAt ? l.createdAt.replace('T', ' ').slice(0, 19) + ' UTC' : new Date().toISOString(),
@@ -163,62 +171,165 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         console.warn('Could not fetch audit logs from database:', auditErr);
       }
     } catch (err) {
-      console.warn('Backend sync failed:', err);
       setBackendConnected(false);
     } finally {
       setIsLiveLoading(false);
     }
   }, []);
 
-  // Sync only after auth is ready and authenticated
+  // Sync only after auth is ready
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       syncWithBackend();
     }
   }, [authLoading, isAuthenticated, syncWithBackend]);
 
-  const handleSetCurrentUser = (_user: UserSession) => {
-    // Current user and role must come only from /auth/me
-  };
+  const handleSetCurrentUser = (_user: UserSession) => {};
 
   const refreshData = async () => {
     await syncWithBackend();
   };
 
-  // Create real application in PostgreSQL
+  // Create application (Instant in demo mode + optional PostgreSQL sync)
   const createApplication = async (input: CreateApplicationInput) => {
+    const formattedType =
+      input.type === 'NEW_INSTITUTION_LOA'
+        ? 'New Approval'
+        : input.type === 'ROUTINE_EOA'
+        ? 'Renewal'
+        : 'Extension';
+
+    const newApp: Application = {
+      id: `AICTE/2026/APP-${1050 + applications.length}`,
+      institution:
+        currentUser.name && currentUser.name !== 'Authenticated User'
+          ? currentUser.department || currentUser.name
+          : 'Delhi Institute of Engineering & Technology',
+      type: formattedType,
+      submittedDate: new Date().toISOString().slice(0, 10),
+      status: 'Submitted',
+      currentStage: 'Intake',
+      reviewer: 'Intake Scrutiny Desk',
+      region: input.assignedRegion === 'NORTH' ? 'Northern Region (Kanpur)' : input.assignedRegion === 'WEST' ? 'Western Region (Mumbai)' : 'Southern Region (Chennai)',
+      academicYear: input.academicYear || '2026-27',
+      deficiencies: [],
+    };
+
+    // Immediate optimistic update
+    setApplications((prev) => [newApp, ...prev]);
+
+    // Append to audit logs
+    const newAuditLog: AuditRecord = {
+      id: `AUD-${Date.now().toString().slice(-4)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' IST',
+      user: currentUser.name || 'Authorised User',
+      role: currentUser.role || 'INSTITUTION',
+      action: 'Application Draft Initiated',
+      details: `New application created: ${newApp.id} for ${newApp.institution}`,
+      category: 'APPROVALS',
+    };
+    setAuditLogs((prev) => [newAuditLog, ...prev]);
+
+    // Try backend persistence in background if online
     try {
-      const created = await api.applications.createDraft({
+      await api.applications.createDraft({
         type: input.type,
         academicYear: input.academicYear,
         assignedRegion: input.assignedRegion,
       });
-      // Re-sync with PostgreSQL database
-      await syncWithBackend();
-      return created;
+      syncWithBackend();
     } catch (err) {
-      console.error('Failed to create application in database:', err);
-      throw err;
+      // Standalone demo mode continues gracefully
     }
+
+    return newApp;
   };
 
-  // Atomic workflow stage transition in PostgreSQL
+  // Atomic workflow stage transition (Instant in demo mode + optional PostgreSQL sync)
   const transitionApplicationStage = async (id: string, targetStage: string, reason?: string) => {
+    // Immediate state transformation
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id !== id) return app;
+
+        let nextStatus: Application['status'] = app.status;
+        let nextStage: Application['currentStage'] = app.currentStage;
+
+        if (targetStage === 'SUBMITTED') {
+          nextStatus = 'Submitted';
+          nextStage = 'Intake';
+        } else if (
+          targetStage === 'SCRUTINY' ||
+          targetStage === 'DEFICIENCY_RESPONSE' ||
+          targetStage === 'RE_SCRUTINY'
+        ) {
+          nextStatus = 'Under Review';
+          nextStage = 'Scrutiny';
+        } else if (targetStage === 'EVC_PENDING') {
+          nextStatus = 'Under Review';
+          nextStage = 'Scrutiny';
+        } else if (targetStage === 'EVC_SCHEDULED' || targetStage === 'EVC_REVIEW') {
+          nextStatus = 'Committee';
+          nextStage = 'Committee Hearing';
+        } else if (targetStage === 'HEARING_OR_COMMITTEE_REVIEW') {
+          nextStatus = 'Committee';
+          nextStage = 'Committee Hearing';
+        } else if (targetStage === 'DECISION_PENDING') {
+          nextStatus = 'Under Review';
+          nextStage = 'Final Human Decision';
+        } else if (targetStage === 'APPROVED') {
+          nextStatus = 'Approved';
+          nextStage = 'Final Human Decision';
+        } else if (targetStage === 'REJECTED') {
+          nextStatus = 'Rejected';
+          nextStage = 'Final Human Decision';
+        }
+
+        return {
+          ...app,
+          status: nextStatus,
+          currentStage: nextStage,
+          finalDecisionNotes:
+            targetStage === 'APPROVED' || targetStage === 'REJECTED'
+              ? reason || `Formal order issued: ${targetStage}`
+              : app.finalDecisionNotes,
+          decisionBy:
+            targetStage === 'APPROVED' || targetStage === 'REJECTED'
+              ? currentUser.name
+              : app.decisionBy,
+          decisionDate:
+            targetStage === 'APPROVED' || targetStage === 'REJECTED'
+              ? new Date().toISOString().slice(0, 10)
+              : app.decisionDate,
+        };
+      })
+    );
+
+    // Append to audit trail
+    const auditEntry: AuditRecord = {
+      id: `AUD-${Date.now().toString().slice(-4)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' IST',
+      user: currentUser.name || 'Statutory Official',
+      role: currentUser.role || 'AICTE Officer',
+      action: `Stage Transition -> ${targetStage}`,
+      details: reason || `Application ${id} moved to ${targetStage}`,
+      category: 'APPROVALS',
+    };
+    setAuditLogs((prev) => [auditEntry, ...prev]);
+
+    // Try backend transition in background if online
     try {
       await api.applications.transition(id, {
         targetStage,
         reason: reason || `Stage transition to ${targetStage}`,
       });
+      syncWithBackend();
     } catch (err) {
-      console.error('API transition error:', err);
-      throw err;
-    } finally {
-      // Refresh live state from PostgreSQL
-      await syncWithBackend();
+      // Standalone demo mode continues smoothly
     }
   };
 
-  // Transition application in PostgreSQL
+  // Transition application
   const updateApplicationStatus = async (
     id: string,
     status: Application['status'],
@@ -234,41 +345,83 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     return transitionApplicationStage(id, targetStage, notes || `State transition to ${status}`);
   };
 
-  // Create real deficiency in PostgreSQL
+  // Create deficiency (Optimistic local + background API)
   const addDeficiency = async (
     appId: string,
     observation: string,
     category: 'Infrastructure' | 'Faculty' | 'Curriculum' | 'Financial & Legal',
     actionRequired: string
   ) => {
+    const newDef = {
+      id: `DEF-${Date.now().toString().slice(-4)}`,
+      category,
+      observation,
+      actionRequired,
+      raisedBy: currentUser.name || 'Senior Scrutiny Officer',
+      raisedAt: new Date().toISOString().slice(0, 10),
+      deadline: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+      status: 'Open' as const,
+    };
+
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id !== appId) return app;
+        return {
+          ...app,
+          deficiencies: [newDef, ...app.deficiencies],
+        };
+      })
+    );
+
     try {
       await api.scrutiny.createDeficiency(appId, {
         clauseReference: `Chapter I (${category})`,
         observation,
         requiredCorrection: actionRequired,
       });
-    } catch (err) {
-      console.warn('API deficiency creation error:', err);
+      syncWithBackend();
+    } catch {
+      // Standalone demo mode continues
     }
-
-    // Refresh live state from PostgreSQL
-    await syncWithBackend();
   };
 
-  // Resolve deficiency in PostgreSQL
+  // Resolve deficiency
   const resolveDeficiency = async (appId: string, defId: string, notes: string) => {
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id !== appId) return app;
+        return {
+          ...app,
+          deficiencies: app.deficiencies.map((d) =>
+            d.id === defId ? { ...d, status: 'Resolved' as const, resolutionNotes: notes } : d
+          ),
+        };
+      })
+    );
+
     try {
       await api.scrutiny.resolveDeficiency(defId, 'RESOLVED');
-    } catch (err) {
-      console.warn('API resolve deficiency error:', err);
+      syncWithBackend();
+    } catch {
+      // Standalone demo mode continues
     }
-
-    // Refresh live state from PostgreSQL
-    await syncWithBackend();
   };
 
-  // Schedule EVC inspection in PostgreSQL
+  // Schedule EVC inspection
   const scheduleEvc = async (appId: string, date: string, committee: string[]) => {
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id !== appId) return app;
+        return {
+          ...app,
+          evcScheduled: date,
+          evcCommittee: committee,
+          currentStage: 'Committee Hearing',
+          status: 'Committee',
+        };
+      })
+    );
+
     try {
       await api.evc.schedule(appId, {
         mode: 'PHYSICAL',
@@ -276,12 +429,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         locationOrLink: 'Campus Facilities Verification',
         memberUserIds: [],
       });
+      syncWithBackend();
     } catch (err) {
-      console.warn('API schedule EVC error:', err);
+      // Standalone demo mode continues
     }
-
-    // Refresh live state from PostgreSQL
-    await syncWithBackend();
   };
 
   // Initiate statutory compliance check

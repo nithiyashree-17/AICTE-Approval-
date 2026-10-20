@@ -31,7 +31,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get('redirect');
 
-  const { isAuthenticated, roleHome, isLoading: authLoading, refreshUser } = useAuth();
+  const { isAuthenticated, roleHome, isLoading: authLoading, refreshUser, loginAsDemo } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -242,8 +242,103 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {/* Fast-Track Demo Mode for Staff & Reviewers */}
+        <div className="pt-4 border-t border-[#EAE6DF] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase font-bold tracking-wider text-[#8C653B] flex items-center gap-1.5">
+              <span>⚡</span> Fast-Track Demo Access (Staff &amp; Reviewers)
+            </span>
+            <span className="text-[10px] text-[#059669] bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200">
+              Zero-Setup
+            </span>
+          </div>
+          <p className="text-[11px] text-[#736B5E] leading-relaxed">
+            Click any statutory role below to explore the working platform with pre-populated live cases:
+          </p>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => loginAsDemo('INSTITUTION')}
+              className="p-2.5 rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] hover:bg-[#F2ECE2] hover:border-[#8C653B] text-left transition-all group"
+            >
+              <span className="font-bold text-[#1A1816] block group-hover:text-[#8C653B]">
+                🎓 Institution
+              </span>
+              <span className="text-[10px] text-[#8C8274]">
+                Create &amp; track filings
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => loginAsDemo('SCRUTINY_OFFICER')}
+              className="p-2.5 rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] hover:bg-[#F2ECE2] hover:border-[#8C653B] text-left transition-all group"
+            >
+              <span className="font-bold text-[#1A1816] block group-hover:text-[#8C653B]">
+                🔍 Scrutiny Officer
+              </span>
+              <span className="text-[10px] text-[#8C8274]">
+                Audit norms &amp; deficiencies
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => loginAsDemo('REGIONAL_OFFICER')}
+              className="p-2.5 rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] hover:bg-[#F2ECE2] hover:border-[#8C653B] text-left transition-all group"
+            >
+              <span className="font-bold text-[#1A1816] block group-hover:text-[#8C653B]">
+                🏢 Regional Officer
+              </span>
+              <span className="text-[10px] text-[#8C8274]">
+                Regional intake &amp; EVCs
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => loginAsDemo('AUTHORITY')}
+              className="p-2.5 rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] hover:bg-[#F2ECE2] hover:border-[#8C653B] text-left transition-all group"
+            >
+              <span className="font-bold text-[#1A1816] block group-hover:text-[#8C653B]">
+                🛡️ Authority
+              </span>
+              <span className="text-[10px] text-[#8C8274]">
+                Final statutory orders
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => loginAsDemo('EVC_COORDINATOR')}
+              className="p-2.5 rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] hover:bg-[#F2ECE2] hover:border-[#8C653B] text-left transition-all group"
+            >
+              <span className="font-bold text-[#1A1816] block group-hover:text-[#8C653B]">
+                📋 EVC Coordinator
+              </span>
+              <span className="text-[10px] text-[#8C8274]">
+                Inspection panel schedule
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => loginAsDemo('ADMIN')}
+              className="p-2.5 rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] hover:bg-[#F2ECE2] hover:border-[#8C653B] text-left transition-all group"
+            >
+              <span className="font-bold text-[#1A1816] block group-hover:text-[#8C653B]">
+                ⚙️ Administrator
+              </span>
+              <span className="text-[10px] text-[#8C8274]">
+                System masters &amp; rules
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Institution Registration Callout */}
-        <div className="pt-4 border-t border-[#EAE6DF] text-center space-y-2">
+        <div className="pt-3 border-t border-[#EAE6DF] text-center space-y-2">
           <p className="text-xs text-[#5C5449]">
             Representing a new or existing educational institution?
           </p>

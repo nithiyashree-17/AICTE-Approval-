@@ -25,7 +25,7 @@ import { useDemo } from '@/features/context/DemoContext';
 
 export function TopNavbar() {
   const pathname = usePathname();
-  const { user, isAuthenticated, logout, roleHome } = useAuth();
+  const { user, isAuthenticated, logout, roleHome, loginAsDemo } = useAuth();
   const { alerts } = useDemo();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -222,6 +222,29 @@ export function TopNavbar() {
             ) : (
               /* Logged-in header controls */
               <div className="flex items-center gap-3">
+                {/* On-the-fly Demo Role Switcher */}
+                <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-xl bg-[#FAF8F5] border border-[#EAE6DF]">
+                  <span className="text-[10px] font-bold text-[#8C653B] uppercase tracking-wider pl-1">
+                    Role:
+                  </span>
+                  <select
+                    value={user?.primaryRole || 'INSTITUTION'}
+                    onChange={(e) => loginAsDemo(e.target.value)}
+                    className="text-xs font-semibold bg-transparent text-[#1A1816] focus:outline-none cursor-pointer pr-1"
+                    title="Switch Demo Role on the fly"
+                  >
+                    <option value="INSTITUTION">🎓 Institution</option>
+                    <option value="SCRUTINY_OFFICER">🔍 Scrutiny Officer</option>
+                    <option value="REGIONAL_OFFICER">🏢 Regional Officer</option>
+                    <option value="BUREAU_OFFICER">🏛️ Bureau Officer</option>
+                    <option value="EVC_COORDINATOR">📋 EVC Coordinator</option>
+                    <option value="EVC_MEMBER">👨‍🏫 EVC Member</option>
+                    <option value="COMMITTEE_MEMBER">⚖️ Committee Member</option>
+                    <option value="AUTHORITY">🛡️ Authority</option>
+                    <option value="SYSTEM_ADMINISTRATOR">⚙️ Administrator</option>
+                  </select>
+                </div>
+
                 {/* Notification Bell with Badge */}
                 <Link
                   href="/notifications"

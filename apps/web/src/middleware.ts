@@ -32,8 +32,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Read session cookie
+  // 2. Read session cookie or standalone demo mode cookie
   const sessionCookie = request.cookies.get('flowguard_session')?.value;
+  const demoRole = request.cookies.get('flowguard_demo')?.value;
+
+  // Standalone Demo Mode bypass: allow staff and reviewers to explore with 0 friction
+  if (demoRole || sessionCookie?.startsWith('demo')) {
+    return NextResponse.next();
+  }
 
   if (!sessionCookie) {
     const loginUrl = new URL('/login', request.url);
