@@ -1,0 +1,22 @@
+[
+  {
+    "id": "user-fixture-inst-1",
+    "email": "registrar@niat-fixture.edu.in",
+    "fullName": "Prof. Alok Verma",
+    "role": "INSTITUTION",
+    "institutionId": "inst-fixture-001",
+    "assignedRegion": "NORTH",
+    "designation": "Registrar",
+    "phone": "+91 98111 22233"
+  },
+  {
+    "id": "user-fixture-inst-2",
+    "email": "principal@saps-fixture.edu.in",
+    "fullName": "Dr. Meenakshi Sundaram",
+    "role": "INSTITUTION",
+    "institutionId": "inst-fixture-002",
+    "assignedRegion": "SOUTH",
+    "designation": "Principal",
+    "phone": "+91 94444 55566"
+  }
+]

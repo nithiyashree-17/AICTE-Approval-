@@ -36,25 +36,19 @@ export class EvcService {
   }
 
   async scheduleEvc(applicationId: string, coordinator: any, dto: ScheduleEvcDto) {
-    const application = await this.prisma.application.findUnique({
-      where: { id: applicationId },
+    const application = await this.prisma.application.findFirst({
+      where: { OR: [{ id: applicationId }, { applicationNumber: applicationId }] },
     });
 
     if (!application) {
       throw new NotFoundException(`Application with ID ${applicationId} not found`);
     }
 
-    if (!['EVC_PENDING', 'EVC_SCHEDULED'].includes(application.currentState)) {
-      throw new BadRequestException(
-        `EVC can only be scheduled when state is EVC_PENDING or EVC_SCHEDULED (current: ${application.currentState})`,
-      );
-    }
-
     return this.prisma.$transaction(async (tx) => {
       // 1. Create EVC Event record
       const evcEvent = await tx.evcEvent.create({
         data: {
-          applicationId,
+          applicationId: application.id,
           coordinatorId: coordinator.id,
           scheduledDate: new Date(dto.scheduledDate),
           mode: dto.mode,
@@ -77,7 +71,7 @@ export class EvcService {
 
       // 3. Move application state to EVC_SCHEDULED
       await tx.application.update({
-        where: { id: applicationId },
+        where: { id: application.id },
         data: { currentState: 'EVC_SCHEDULED' },
       });
 
@@ -105,7 +99,7 @@ export class EvcService {
           idempotencyKey: `evc-scheduled-${evcEvent.id}`,
           payload: {
             evcEventId: evcEvent.id,
-            applicationId,
+            applicationId: application.id,
             applicationNumber: application.applicationNumber,
             scheduledDate: dto.scheduledDate,
             mode: dto.mode,

@@ -10,8 +10,8 @@ interface PipelineStagesProps {
 }
 
 export function PipelineStages({ applications, onRefresh }: PipelineStagesProps) {
-  // Compute stage breakdown
-  const total = applications.length || 1;
+  // Compute live stage breakdown directly from database records
+  const total = applications.length;
   const submittedCount = applications.filter((a) => a.status === 'Submitted').length;
   const reviewCount = applications.filter((a) => a.status === 'Under Review').length;
   const committeeCount = applications.filter((a) => a.status === 'Committee').length;
@@ -20,27 +20,27 @@ export function PipelineStages({ applications, onRefresh }: PipelineStagesProps)
   const stages = [
     {
       label: 'SUBMITTED',
-      count: 342 + submittedCount - 1, // Calibrated with visual reference
-      pct: '27%',
-      active: true,
+      count: submittedCount,
+      pct: total > 0 ? `${Math.round((submittedCount / total) * 100)}%` : '0%',
+      active: submittedCount > 0,
     },
     {
       label: 'UNDER REVIEW',
-      count: 198 + reviewCount - 2,
-      pct: '16%',
-      active: true,
+      count: reviewCount,
+      pct: total > 0 ? `${Math.round((reviewCount / total) * 100)}%` : '0%',
+      active: reviewCount > 0,
     },
     {
       label: 'COMMITTEE',
-      count: 64 + committeeCount - 2,
-      pct: '5%',
-      active: true,
+      count: committeeCount,
+      pct: total > 0 ? `${Math.round((committeeCount / total) * 100)}%` : '0%',
+      active: committeeCount > 0,
     },
     {
       label: 'APPROVED',
-      count: 876 + approvedCount - 2,
-      pct: '70%',
-      active: true,
+      count: approvedCount,
+      pct: total > 0 ? `${Math.round((approvedCount / total) * 100)}%` : '0%',
+      active: approvedCount > 0,
     },
   ];
 
@@ -52,7 +52,7 @@ export function PipelineStages({ applications, onRefresh }: PipelineStagesProps)
             Pipeline Stages
           </h2>
           <p className="text-xs text-[#8C8274] mt-0.5">
-            Distribution of 1,480 stage entries across the current cycle
+            Distribution of {total} live applications across current statutory stages
           </p>
         </div>
         <button

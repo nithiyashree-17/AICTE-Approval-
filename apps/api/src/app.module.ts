@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ApplicationsModule } from './applications/applications.module';
@@ -11,6 +12,12 @@ import { AuditModule } from './audit/audit.module';
 import { ReportsModule } from './reports/reports.module';
 import { DocumentsModule } from './documents/documents.module';
 import { CommitteesModule } from './committees/committees.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
+
+import { ScopeService } from './common/scope.service';
+
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -27,5 +34,18 @@ import { CommitteesModule } from './committees/committees.module';
     DocumentsModule,
     CommitteesModule,
   ],
+  controllers: [AppController],
+  providers: [
+    ScopeService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
+  exports: [ScopeService],
 })
 export class AppModule {}

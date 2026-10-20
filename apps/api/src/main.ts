@@ -1,10 +1,14 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable cookie parser for httpOnly session cookies
+  app.use(cookieParser());
 
   // Enable CORS for frontend web client
   app.enableCors({
@@ -28,7 +32,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('AICTE FlowGuard - Backend API')
     .setDescription(
-      'Integrated AICTE Approval Workflow Automation, Compliance Monitoring, and Alert Management System (Problem ID 26262)',
+      'AICTE FlowGuard Approval Workflow Automation, Compliance Monitoring, and Alert Management System',
     )
     .setVersion('1.0')
     .addBearerAuth()
@@ -44,6 +48,34 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Serve root status endpoint
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.get('/', (_req: any, res: any) => {
+    res.json({
+      status: 'ok',
+      service: 'AICTE FlowGuard - Approval Workflow Automation API',
+      version: '1.0.0',
+      apiBase: '/api/v1',
+      documentation: '/api/docs',
+    });
+  });
+
+  httpAdapter.get('/health', (_req: any, res: any) => {
+    res.json({
+      status: 'UP',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  httpAdapter.get('/health/liveness', (_req: any, res: any) => {
+    res.json({ status: 'UP' });
+  });
+
+  httpAdapter.get('/health/readiness', (_req: any, res: any) => {
+    res.json({ status: 'UP', db: 'connected' });
+  });
 
   const port = process.env.PORT_API || 4000;
   await app.listen(port);

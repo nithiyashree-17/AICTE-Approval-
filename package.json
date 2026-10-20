@@ -5,6 +5,7 @@
   "description": "AICTE FlowGuard - Integrated Approval Workflow Automation, Compliance Monitoring and Alert Management System (Problem ID 26262)",
   "scripts": {
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:app": "pnpm --parallel --filter web --filter api dev",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
     "dev:worker": "pnpm --filter worker dev",
@@ -15,6 +16,7 @@
     "test:unit": "pnpm --filter \"./packages/*\" --filter \"./apps/*\" test",
     "test:integration": "pnpm --filter api test:e2e",
     "test:e2e": "playwright test",
+    "test:e2e:reset": "node scripts/test_db_reset.js && playwright test",
     "prisma:generate": "pnpm --filter api prisma:generate",
     "prisma:migrate": "pnpm --filter api prisma:migrate",
     "prisma:studio": "pnpm --filter api prisma:studio",
@@ -37,6 +39,7 @@
   "license": "UNLICENSED",
   "packageManager": "pnpm@9.0.0",
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "dotenv": "^18.0.8",
     "prisma": "5.22.0"
   },

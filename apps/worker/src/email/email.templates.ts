@@ -32,7 +32,7 @@ export class EmailTemplates {
       ${contentHtml}
     </div>
     <div class="footer">
-      AICTE Integrated Approval Workflow Automation System • Problem Statement ID 26262
+      AICTE FlowGuard System
     </div>
   </div>
 </body>

@@ -22,7 +22,7 @@ import { useDemo } from '@/features/context/DemoContext';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { currentUser, setCurrentUser, alerts } = useDemo();
+  const { currentUser, setCurrentUser, alerts, backendConnected } = useDemo();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const unreadAlertsCount = alerts.filter((a) => a.status === 'Unread').length;
@@ -108,17 +108,47 @@ export function Sidebar() {
     <aside className="w-64 min-h-screen bg-[#FAF8F5] border-r border-[#EAE6DF] flex flex-col justify-between select-none">
       <div>
         {/* Brand Header */}
-        <div className="px-5 pt-5 pb-4 flex flex-col gap-2">
-          <Link href="/applications" className="block focus:outline-none focus:ring-1 focus:ring-[#8C653B] rounded-lg">
-            <img
-              src="/logo.png"
-              alt="AICTE Approve"
-              className="h-11 w-auto max-w-[200px] object-contain rounded-lg shadow-xs"
-            />
+        <div className="px-5 pt-6 pb-4 flex flex-col items-center text-center gap-2.5 border-b border-[#EAE6DF]/70">
+          <Link
+            href="/applications"
+            className="block focus:outline-none focus:ring-2 focus:ring-[#8C653B] rounded-2xl group transition-transform hover:scale-[1.02]"
+          >
+            <div className="w-24 h-24 rounded-2xl bg-white border border-[#EAE6DF] shadow-xs flex items-center justify-center p-2 mx-auto">
+              <img
+                src="/logo.png"
+                alt="AICTE FlowGuard Platform"
+                className="w-full h-full object-contain"
+              />
+            </div>
           </Link>
-          <span className="text-[10px] uppercase tracking-widest text-[#8C653B] font-semibold pl-1">
-            FlowGuard Platform
-          </span>
+          <div className="w-full">
+            <h2 className="font-serif font-bold text-sm text-[#1A1816] tracking-tight">
+              AICTE FlowGuard
+            </h2>
+            <div className="flex items-center justify-center gap-1.5 mt-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-[#8C653B] font-semibold">
+                Approval Portal
+              </span>
+              <span className="text-[#8C8274] text-[9px]">&bull;</span>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold border',
+                  backendConnected
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                )}
+                title={backendConnected ? 'Live connected to http://localhost:4000/api/v1' : 'Connecting to API'}
+              >
+                <span
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-full',
+                    backendConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                  )}
+                />
+                {backendConnected ? 'API Live' : 'Connecting'}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Navigation Links */}
@@ -158,10 +188,7 @@ export function Sidebar() {
 
       {/* Role Profile & Demonstration Switcher */}
       <div className="p-3 border-t border-[#EAE6DF] relative">
-        <button
-          onClick={() => setShowRoleMenu(!showRoleMenu)}
-          className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#F2ECE2] transition-colors text-left"
-        >
+        <div className="w-full flex items-center gap-3 p-2.5 rounded-lg text-left">
           <img
             src={currentUser.avatar}
             alt={currentUser.name}
@@ -175,37 +202,7 @@ export function Sidebar() {
               {currentUser.designation}
             </p>
           </div>
-          <ChevronDown className="w-4 h-4 text-[#8C8274]" />
-        </button>
-
-        {showRoleMenu && (
-          <div className="absolute bottom-16 left-3 right-3 bg-white border border-[#EAE6DF] rounded-xl shadow-dropdown p-2 z-50">
-            <p className="px-2 py-1 text-[10px] uppercase font-bold tracking-wider text-[#8C653B]">
-              Switch Demonstration Role
-            </p>
-            {demoRoles.map((role) => (
-              <button
-                key={role.name}
-                onClick={() => {
-                  setCurrentUser(role);
-                  setShowRoleMenu(false);
-                }}
-                className={cn(
-                  'w-full text-left p-2 rounded-lg text-xs transition-colors flex items-center gap-2 mt-1',
-                  currentUser.name === role.name
-                    ? 'bg-[#F5EDE4] font-semibold text-[#1A1816]'
-                    : 'hover:bg-[#FAF8F5] text-[#5C5449]'
-                )}
-              >
-                <UserCheck className="w-3.5 h-3.5 text-[#8C653B]" />
-                <div>
-                  <div className="text-[12px]">{role.name}</div>
-                  <div className="text-[10px] text-[#8C8274]">{role.designation}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+        </div>
       </div>
     </aside>
   );

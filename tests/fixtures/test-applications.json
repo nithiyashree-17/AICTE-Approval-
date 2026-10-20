@@ -1,0 +1,24 @@
+[
+  {
+    "id": "app-fixture-001",
+    "applicationNumber": "AICTE-2026-FIXTURE-1001",
+    "academicYear": "2026-2027",
+    "type": "NEW_INSTITUTION_LOA",
+    "workflowDefinitionKey": "TEMPLATE_A_NEW_INSTITUTION_LOA",
+    "workflowVersion": 1,
+    "currentState": "SUBMITTED",
+    "assignedRegion": "NORTH",
+    "institutionId": "inst-fixture-001"
+  },
+  {
+    "id": "app-fixture-002",
+    "applicationNumber": "AICTE-2026-FIXTURE-2002",
+    "academicYear": "2026-2027",
+    "type": "ROUTINE_EOA",
+    "workflowDefinitionKey": "TEMPLATE_B_ROUTINE_EOA",
+    "workflowVersion": 1,
+    "currentState": "SCRUTINY",
+    "assignedRegion": "SOUTH",
+    "institutionId": "inst-fixture-002"
+  }
+]

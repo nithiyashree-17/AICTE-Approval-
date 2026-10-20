@@ -1,0 +1,26 @@
+[
+  {
+    "id": "inst-fixture-001",
+    "aicteCode": "1-NORTH-FIXTURE-101",
+    "name": "Northern Institute of Advanced Technology",
+    "type": "ENGINEERING",
+    "region": "NORTH",
+    "state": "Uttar Pradesh",
+    "address": "Plot 12, Sector 62, Noida, UP 201309",
+    "contactEmail": "registrar@niat-fixture.edu.in",
+    "contactPhone": "+91 98111 22233",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "inst-fixture-002",
+    "aicteCode": "1-SOUTH-FIXTURE-202",
+    "name": "Southern Academy of Pharmaceutical Sciences",
+    "type": "PHARMACY",
+    "region": "SOUTH",
+    "state": "Tamil Nadu",
+    "address": "45 Anna Salai, Guindy, Chennai, TN 600025",
+    "contactEmail": "principal@saps-fixture.edu.in",
+    "contactPhone": "+91 94444 55566",
+    "status": "ACTIVE"
+  }
+]

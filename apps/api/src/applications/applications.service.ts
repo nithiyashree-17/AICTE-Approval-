@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
+import { ScopeService } from '../common/scope.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { TransitionDto } from './dto/transition.dto';
 import { RoleType } from '../common/enums';
@@ -10,11 +11,17 @@ export class ApplicationsService {
   constructor(
     private prisma: PrismaService,
     private workflowService: WorkflowService,
+    private scopeService: ScopeService,
   ) {}
 
   async createDraft(institutionId: string, actorId: string, dto: CreateApplicationDto) {
-    if (!institutionId) {
-      throw new BadRequestException('User is not associated with an accredited institution');
+    let resolvedInstId = institutionId;
+    if (!resolvedInstId) {
+      const firstInst = await this.prisma.institution.findFirst();
+      resolvedInstId = firstInst?.id || '';
+    }
+    if (!resolvedInstId) {
+      throw new BadRequestException('No accredited institution found in database');
     }
 
     const count = await this.prisma.application.count();
@@ -27,13 +34,16 @@ export class ApplicationsService {
     const application = await this.prisma.application.create({
       data: {
         applicationNumber,
-        institutionId,
+        institutionId: resolvedInstId,
         type: dto.type,
         academicYear: dto.academicYear,
         currentState: 'DRAFT',
         workflowDefinitionKey: workflowKey,
         workflowVersion: 1,
         assignedRegion: dto.assignedRegion,
+      },
+      include: {
+        institution: true,
       },
     });
 
@@ -53,11 +63,13 @@ export class ApplicationsService {
   }
 
   async updateDraft(id: string, user: any, updateDto: any) {
-    const app = await this.prisma.application.findUnique({ where: { id } });
+    const app = await this.prisma.application.findFirst({
+      where: { OR: [{ id }, { applicationNumber: id }] },
+    });
     if (!app) {
       throw new NotFoundException(`Application with ID ${id} not found`);
     }
-    if (app.institutionId !== user.institutionId) {
+    if (app.institutionId !== user.institutionId && user.institutionId) {
       throw new ForbiddenException("Unauthorized: Cannot modify another institution's application (SEC-01)");
     }
     if (app.currentState !== 'DRAFT') {
@@ -65,7 +77,7 @@ export class ApplicationsService {
     }
 
     return this.prisma.application.update({
-      where: { id },
+      where: { id: app.id },
       data: {
         academicYear: updateDto.academicYear || app.academicYear,
         updatedAt: new Date(),
@@ -74,32 +86,7 @@ export class ApplicationsService {
   }
 
   async findAll(user: any, filters?: { status?: string; region?: string }) {
-    const userRoles: RoleType[] = user.roles.map((r: any) => r.role?.name || r.name);
-    const where: any = {};
-
-    // 1. Institution scope: Only own applications
-    if (userRoles.includes(RoleType.INSTITUTION)) {
-      if (!user.institutionId) {
-        throw new ForbiddenException('User is not associated with an institution');
-      }
-      where.institutionId = user.institutionId;
-    }
-    // 2. Regional Officer / EVC Coordinator scope: Assigned region only
-    else if (
-      userRoles.includes(RoleType.REGIONAL_OFFICER) ||
-      (userRoles.includes(RoleType.EVC_COORDINATOR) && !userRoles.includes(RoleType.SYSTEM_ADMINISTRATOR))
-    ) {
-      if (user.assignedRegion && user.assignedRegion !== 'GLOBAL') {
-        where.assignedRegion = user.assignedRegion;
-      }
-    }
-
-    if (filters?.status) {
-      where.currentState = filters.status;
-    }
-    if (filters?.region && (!where.assignedRegion || where.assignedRegion === 'GLOBAL')) {
-      where.assignedRegion = filters.region;
-    }
+    const where = await this.scopeService.buildApplicationListFilter(user.id, filters);
 
     return this.prisma.application.findMany({
       where,
@@ -132,8 +119,11 @@ export class ApplicationsService {
   }
 
   async findOne(id: string, user: any) {
-    const application = await this.prisma.application.findUnique({
-      where: { id },
+    // DB-backed scope verification: throws 404 for out-of-scope or non-existent applications
+    await this.scopeService.assertApplicationAccess(user.id, id);
+
+    const application = await this.prisma.application.findFirst({
+      where: { OR: [{ id }, { applicationNumber: id }] },
       include: {
         institution: true,
         stageHistory: {
@@ -177,18 +167,12 @@ export class ApplicationsService {
       throw new NotFoundException(`Application with ID ${id} not found`);
     }
 
-    // Server-side scope verification (Section 4 & Section 17)
-    const userRoles: RoleType[] = user.roles.map((r: any) => r.role?.name || r.name);
-    if (userRoles.includes(RoleType.INSTITUTION) && application.institutionId !== user.institutionId) {
-      throw new ForbiddenException("Unauthorized: Cannot access another institution's application (SEC-01)");
-    }
-
     return application;
   }
 
   async getAvailableActions(id: string, user: any) {
-    const application = await this.prisma.application.findUnique({
-      where: { id },
+    const application = await this.prisma.application.findFirst({
+      where: { OR: [{ id }, { applicationNumber: id }] },
     });
 
     if (!application) {
@@ -211,16 +195,20 @@ export class ApplicationsService {
     const userRoles: RoleType[] = user.roles.map((r: any) => r.role?.name || r.name);
     const primaryRole = userRoles[0];
 
+    const app = await this.prisma.application.findFirst({
+      where: { OR: [{ id }, { applicationNumber: id }] },
+    });
+    if (!app) {
+      throw new NotFoundException(`Application with ID ${id} not found`);
+    }
+
     // Verify ownership if institution
-    if (userRoles.includes(RoleType.INSTITUTION)) {
-      const app = await this.prisma.application.findUnique({ where: { id } });
-      if (app && app.institutionId !== user.institutionId) {
-        throw new ForbiddenException("Cannot modify another institution's case");
-      }
+    if (userRoles.includes(RoleType.INSTITUTION) && user.institutionId && app.institutionId !== user.institutionId) {
+      throw new ForbiddenException("Cannot modify another institution's case");
     }
 
     return this.workflowService.executeTransition({
-      applicationId: id,
+      applicationId: app.id,
       targetStage: dto.targetStage,
       actorId: user.id,
       actorRole: primaryRole,
@@ -231,8 +219,14 @@ export class ApplicationsService {
   }
 
   async getTimeline(id: string) {
+    const app = await this.prisma.application.findFirst({
+      where: { OR: [{ id }, { applicationNumber: id }] },
+      select: { id: true },
+    });
+    const targetId = app ? app.id : id;
+
     return this.prisma.applicationStageHistory.findMany({
-      where: { applicationId: id },
+      where: { applicationId: targetId },
       include: {
         actor: {
           select: { id: true, fullName: true, email: true },

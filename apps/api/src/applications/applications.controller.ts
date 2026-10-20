@@ -32,8 +32,14 @@ export class ApplicationsController {
   ) {}
 
   @Post()
-  @Roles(RoleType.INSTITUTION)
-  @ApiOperation({ summary: 'Draft a new application (Institution only)' })
+  @Roles(
+    RoleType.INSTITUTION,
+    RoleType.REGIONAL_OFFICER,
+    RoleType.BUREAU_OFFICER,
+    RoleType.SCRUTINY_OFFICER,
+    RoleType.SYSTEM_ADMINISTRATOR,
+  )
+  @ApiOperation({ summary: 'Draft a new application' })
   @ApiResponse({ status: 201, description: 'Application draft created successfully' })
   createDraft(@CurrentUser() user: any, @Body() dto: CreateApplicationDto) {
     return this.applicationsService.createDraft(user.institutionId, user.id, dto);

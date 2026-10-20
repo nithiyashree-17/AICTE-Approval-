@@ -1,0 +1,15 @@
+{
+  "cookies": [
+    {
+      "name": "flowguard_session",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxOTAyMTEyZS02ZDM2LTRmNDMtOWM1Ny02N2ZiMTA4ZjFlNGUiLCJlbWFpbCI6ImV2Y19tZW1iZXJAZmxvd2d1YXJkLmxvY2FsIiwicm9sZXMiOlsiRVZDX01FTUJFUiJdLCJwcmltYXJ5Um9sZSI6IkVWQ19NRU1CRVIiLCJpbnN0aXR1dGlvbklkIjpudWxsLCJhc3NpZ25lZFJlZ2lvbiI6Ik5PUlRIIiwiaWF0IjoxNzkyNDYzNTc0LCJleHAiOjE3OTI0OTIzNzR9.94o3QU8wbS4Z-cBk6Psp5liHz3w3-medwNnAnAaSvW0",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1792492374.713121,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

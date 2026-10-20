@@ -16,6 +16,8 @@ import {
   MoreHorizontal,
   ArrowRight,
   ExternalLink,
+  X,
+  Database,
 } from 'lucide-react';
 import { useDemo } from '@/features/context/DemoContext';
 import { Application, ApplicationStatus } from '@/lib/types';
@@ -25,11 +27,33 @@ import { PipelineStages } from '@/components/dashboard/PipelineStages';
 import { ApplicationDetailsModal } from '@/components/workflow/ApplicationDetailsModal';
 
 export default function ApplicationsPage() {
-  const { applications, auditLogs } = useDemo();
+  const { applications, auditLogs, createApplication } = useDemo();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | ApplicationStatus>('ALL');
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showNewAppModal, setShowNewAppModal] = useState(false);
+  const [newAppType, setNewAppType] = useState<'NEW_INSTITUTION_LOA' | 'ROUTINE_EOA' | 'EOA_SUBSTANTIVE_CHANGE'>('NEW_INSTITUTION_LOA');
+  const [newAppYear, setNewAppYear] = useState('2026-27');
+  const [newAppRegion, setNewAppRegion] = useState('NORTH');
+  const [isCreatingApp, setIsCreatingApp] = useState(false);
+
+  const handleCreateNewApp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreatingApp(true);
+    try {
+      await createApplication({
+        type: newAppType,
+        academicYear: newAppYear,
+        assignedRegion: newAppRegion,
+      });
+      setShowNewAppModal(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCreatingApp(false);
+    }
+  };
 
   // Filter applications
   const filteredApps = useMemo(() => {
@@ -45,6 +69,16 @@ export default function ApplicationsPage() {
       return matchesSearch && matchesStatus;
     });
   }, [applications, searchQuery, statusFilter]);
+
+  // Compute live aggregates from database
+  const totalAppsCount = applications.length;
+  const pendingAppsCount = applications.filter(
+    (a) => a.status === 'Submitted' || a.status === 'Under Review' || a.status === 'Committee'
+  ).length;
+  const approvedAppsCount = applications.filter((a) => a.status === 'Approved').length;
+  const rejectedAppsCount = applications.filter((a) => a.status === 'Rejected').length;
+  const decidedTotal = approvedAppsCount + rejectedAppsCount;
+  const approvalRatePct = decidedTotal > 0 ? Math.round((approvedAppsCount / decidedTotal) * 100) : 100;
 
   const filterTabs = [
     'ALL',
@@ -107,11 +141,11 @@ export default function ApplicationsPage() {
           </button>
 
           <button
-            onClick={() => setSelectedApp(applications[0])}
+            onClick={() => setShowNewAppModal(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#1A1816] rounded-lg hover:bg-[#2e2a26] transition-colors shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
-            NEW REVIEW
+            NEW APPLICATION
           </button>
         </div>
       </div>
@@ -128,11 +162,13 @@ export default function ApplicationsPage() {
           </div>
           <div className="my-2">
             <span className="font-serif font-bold text-4xl text-[#1A1816]">
-              1,248
+              {totalAppsCount}
             </span>
           </div>
           <div className="text-[11px] text-[#8C8274]">
-            <span className="font-semibold text-[#8C653B]">+12 this week</span> &bull; Cycle started Apr 1, 2026
+            <span className="font-semibold text-[#8C653B]">
+              {totalAppsCount > 0 ? `${totalAppsCount} active in current cycle` : 'No filings yet'}
+            </span> &bull; Statutory 2026-27
           </div>
         </div>
 
@@ -146,11 +182,11 @@ export default function ApplicationsPage() {
           </div>
           <div className="my-2">
             <span className="font-serif font-bold text-3xl text-[#1A1816]">
-              342
+              {pendingAppsCount}
             </span>
           </div>
-          <div className="text-[11px] font-bold text-[#DC2626]">
-            18 escalated
+          <div className="text-[11px] font-bold text-[#D97706]">
+            {pendingAppsCount} in active review
           </div>
         </div>
 
@@ -163,11 +199,11 @@ export default function ApplicationsPage() {
           </div>
           <div className="my-2">
             <span className="font-serif font-bold text-3xl text-[#1A1816]">
-              876
+              {approvedAppsCount}
             </span>
           </div>
           <div className="text-[11px] font-medium text-[#059669]">
-            92% on time
+            {approvalRatePct}% approval rate
           </div>
         </div>
 
@@ -180,11 +216,11 @@ export default function ApplicationsPage() {
           </div>
           <div className="my-2">
             <span className="font-serif font-bold text-3xl text-[#1A1816]">
-              30
+              {rejectedAppsCount}
             </span>
           </div>
           <div className="text-[11px] text-[#8C8274]">
-            5 this week
+            {rejectedAppsCount} speaking orders issued
           </div>
         </div>
       </div>
@@ -193,18 +229,18 @@ export default function ApplicationsPage() {
       <div className="bg-white border border-[#EAE6DF] rounded-xl px-6 py-3 card-shadow flex items-center justify-between">
         <div className="flex items-center gap-4 flex-1 mr-6">
           <span className="text-[11px] uppercase font-bold tracking-wider text-[#736B5E] shrink-0">
-            Approval Rate &bull; Rolling 30 Days
+            Approval Rate &bull; Current Statutory Cycle
           </span>
           <div className="w-full bg-[#F2ECE2] h-2 rounded-full overflow-hidden">
             <div
               className="bg-[#8C653B] h-full rounded-full transition-all duration-500"
-              style={{ width: '92.1%' }}
+              style={{ width: `${approvalRatePct}%` }}
             />
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0 text-xs">
-          <span className="text-[#8C8274]">target 85%</span>
-          <span className="font-bold text-[#1A1816]">92.1%</span>
+          <span className="text-[#8C8274]">statutory benchmark 85%</span>
+          <span className="font-bold text-[#1A1816]">{approvalRatePct}%</span>
         </div>
       </div>
 
@@ -224,7 +260,7 @@ export default function ApplicationsPage() {
                     Applications
                   </h3>
                   <span className="text-xs text-[#8C8274]">
-                    Showing {filteredApps.length} of 1,248 &bull; Last 90 days
+                    Showing {filteredApps.length} of {totalAppsCount} &bull; Real-time Database Records
                   </span>
                 </div>
               </div>
@@ -372,6 +408,108 @@ export default function ApplicationsPage() {
           application={selectedApp}
           onClose={() => setSelectedApp(null)}
         />
+      )}
+
+      {/* New Application Draft Modal - Persists to PostgreSQL */}
+      {showNewAppModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-[#EAE6DF] rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#EAE6DF] pb-4">
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#8C653B]">
+                  Statutory Submission Engine
+                </span>
+                <h2 className="text-xl font-serif font-bold text-[#1A1816]">
+                  Draft New AICTE Application
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowNewAppModal(false)}
+                className="p-1 rounded-lg text-[#8C8274] hover:text-[#1A1816] hover:bg-[#FAF8F5]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateNewApp} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[#1A1816] mb-1">
+                  Statutory Application Category
+                </label>
+                <select
+                  value={newAppType}
+                  onChange={(e: any) => setNewAppType(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-lg border border-[#EAE6DF] bg-[#FAF8F5] text-[#1A1816] focus:outline-none focus:border-[#8C653B]"
+                >
+                  <option value="NEW_INSTITUTION_LOA">New Technical Institution (LoA Grant)</option>
+                  <option value="ROUTINE_EOA">Extension of Approval (Routine Annual EoA)</option>
+                  <option value="EOA_SUBSTANTIVE_CHANGE">EoA with Substantive Change (Intake / New Course)</option>
+                </select>
+                <span className="text-[10px] text-[#736B5E] mt-1 block">
+                  Regulated under AICTE Approval Process Handbook (APH 2024-27).
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#1A1816] mb-1">
+                    Academic Year
+                  </label>
+                  <input
+                    type="text"
+                    value={newAppYear}
+                    onChange={(e) => setNewAppYear(e.target.value)}
+                    required
+                    placeholder="2026-27"
+                    className="w-full text-xs p-2.5 rounded-lg border border-[#EAE6DF] bg-[#FAF8F5] text-[#1A1816] focus:outline-none focus:border-[#8C653B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#1A1816] mb-1">
+                    Regional Jurisdiction
+                  </label>
+                  <select
+                    value={newAppRegion}
+                    onChange={(e) => setNewAppRegion(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-lg border border-[#EAE6DF] bg-[#FAF8F5] text-[#1A1816] focus:outline-none focus:border-[#8C653B]"
+                  >
+                    <option value="NORTH">Northern Region (Kanpur/Delhi)</option>
+                    <option value="WEST">Western Region (Mumbai)</option>
+                    <option value="SOUTH">Southern Region (Chennai)</option>
+                    <option value="EAST">Eastern Region (Kolkata)</option>
+                    <option value="CENTRAL">Central Region (Bhopal)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#EAE6DF] flex items-start gap-2.5 text-xs text-[#5C5449]">
+                <Database className="w-4 h-4 text-[#8C653B] shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold block text-[#1A1816]">Direct Database Persistence:</span>
+                  This will generate an official application number, set state to DRAFT, create initial stage audit history, and store in PostgreSQL.
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewAppModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#5C5449] hover:bg-[#FAF8F5] rounded-lg border border-[#EAE6DF]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingApp}
+                  className="px-4 py-2 text-xs font-bold text-white bg-[#1A1816] hover:bg-[#2e2a26] rounded-lg transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                >
+                  {isCreatingApp ? 'Saving to Database...' : 'Save Application Draft'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

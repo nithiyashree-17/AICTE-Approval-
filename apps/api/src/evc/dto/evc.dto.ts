@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString, IsArray, IsDateString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, IsArray, IsDateString, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { EvcMode, AssignmentRole } from '../../common/enums';
 
@@ -39,5 +39,6 @@ export class SubmitEvcReportDto {
   s3ObjectKey: string;
 
   @ApiProperty({ example: { infrastructureCompliant: true, laboratoryScore: 92, remarks: 'Verified lab capacity.' } })
+  @IsObject()
   findings: any;
 }

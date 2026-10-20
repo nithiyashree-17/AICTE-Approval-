@@ -26,43 +26,43 @@ export class WorkflowService {
     { target: string; roles: RoleType[]; requiresReason?: boolean }[]
   > = {
     DRAFT: [
-      { target: 'SUBMITTED', roles: [RoleType.INSTITUTION] },
+      { target: 'SUBMITTED', roles: [RoleType.INSTITUTION, RoleType.SYSTEM_ADMINISTRATOR] },
     ],
     SUBMITTED: [
       { target: 'SCRUTINY', roles: [RoleType.REGIONAL_OFFICER, RoleType.BUREAU_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] },
-      { target: 'RETURNED', roles: [RoleType.REGIONAL_OFFICER, RoleType.BUREAU_OFFICER], requiresReason: true },
+      { target: 'RETURNED', roles: [RoleType.REGIONAL_OFFICER, RoleType.BUREAU_OFFICER, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
     ],
     SCRUTINY: [
-      { target: 'DEFICIENCY_RESPONSE', roles: [RoleType.SCRUTINY_OFFICER], requiresReason: true },
-      { target: 'EVC_PENDING', roles: [RoleType.SCRUTINY_OFFICER, RoleType.REGIONAL_OFFICER] },
-      { target: 'DECISION_PENDING', roles: [RoleType.SCRUTINY_OFFICER, RoleType.REGIONAL_OFFICER] }, // Direct path for routine EoA
+      { target: 'DEFICIENCY_RESPONSE', roles: [RoleType.SCRUTINY_OFFICER, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
+      { target: 'EVC_PENDING', roles: [RoleType.SCRUTINY_OFFICER, RoleType.REGIONAL_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] },
+      { target: 'DECISION_PENDING', roles: [RoleType.SCRUTINY_OFFICER, RoleType.REGIONAL_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] }, // Direct path for routine EoA
     ],
     DEFICIENCY_RESPONSE: [
-      { target: 'RE_SCRUTINY', roles: [RoleType.INSTITUTION] },
+      { target: 'RE_SCRUTINY', roles: [RoleType.INSTITUTION, RoleType.SYSTEM_ADMINISTRATOR] },
     ],
     RE_SCRUTINY: [
-      { target: 'EVC_PENDING', roles: [RoleType.SCRUTINY_OFFICER] },
-      { target: 'HEARING_OR_COMMITTEE_REVIEW', roles: [RoleType.SCRUTINY_OFFICER], requiresReason: true },
-      { target: 'DECISION_PENDING', roles: [RoleType.SCRUTINY_OFFICER] },
-      { target: 'REJECTED', roles: [RoleType.SCRUTINY_OFFICER, RoleType.COMPETENT_AUTHORITY], requiresReason: true },
+      { target: 'EVC_PENDING', roles: [RoleType.SCRUTINY_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] },
+      { target: 'HEARING_OR_COMMITTEE_REVIEW', roles: [RoleType.SCRUTINY_OFFICER, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
+      { target: 'DECISION_PENDING', roles: [RoleType.SCRUTINY_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] },
+      { target: 'REJECTED', roles: [RoleType.SCRUTINY_OFFICER, RoleType.COMPETENT_AUTHORITY, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
     ],
     EVC_PENDING: [
-      { target: 'EVC_SCHEDULED', roles: [RoleType.EVC_COORDINATOR, RoleType.REGIONAL_OFFICER] },
+      { target: 'EVC_SCHEDULED', roles: [RoleType.EVC_COORDINATOR, RoleType.REGIONAL_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] },
     ],
     EVC_SCHEDULED: [
-      { target: 'EVC_REVIEW', roles: [RoleType.EVC_MEMBER, RoleType.EVC_COORDINATOR] },
+      { target: 'EVC_REVIEW', roles: [RoleType.EVC_MEMBER, RoleType.EVC_COORDINATOR, RoleType.SYSTEM_ADMINISTRATOR] },
     ],
     EVC_REVIEW: [
-      { target: 'DECISION_PENDING', roles: [RoleType.EVC_COORDINATOR, RoleType.REGIONAL_OFFICER] },
-      { target: 'HEARING_OR_COMMITTEE_REVIEW', roles: [RoleType.REGIONAL_OFFICER], requiresReason: true },
+      { target: 'DECISION_PENDING', roles: [RoleType.EVC_COORDINATOR, RoleType.REGIONAL_OFFICER, RoleType.SYSTEM_ADMINISTRATOR] },
+      { target: 'HEARING_OR_COMMITTEE_REVIEW', roles: [RoleType.REGIONAL_OFFICER, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
     ],
     HEARING_OR_COMMITTEE_REVIEW: [
-      { target: 'DECISION_PENDING', roles: [RoleType.SAC_SHC] },
+      { target: 'DECISION_PENDING', roles: [RoleType.SAC_SHC, RoleType.SYSTEM_ADMINISTRATOR] },
     ],
     DECISION_PENDING: [
-      // Only COMPETENT_AUTHORITY can make the final statutory decision (Section 4 & 8.2)
-      { target: 'APPROVED', roles: [RoleType.COMPETENT_AUTHORITY], requiresReason: true },
-      { target: 'REJECTED', roles: [RoleType.COMPETENT_AUTHORITY], requiresReason: true },
+      // Competent authority or Admin makes the final statutory decision
+      { target: 'APPROVED', roles: [RoleType.COMPETENT_AUTHORITY, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
+      { target: 'REJECTED', roles: [RoleType.COMPETENT_AUTHORITY, RoleType.SYSTEM_ADMINISTRATOR], requiresReason: true },
     ],
   };
 

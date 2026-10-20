@@ -8,8 +8,8 @@ export class ScrutinyService {
   constructor(private prisma: PrismaService) {}
 
   async createDeficiency(applicationId: string, actor: any, dto: CreateDeficiencyDto) {
-    const application = await this.prisma.application.findUnique({
-      where: { id: applicationId },
+    const application = await this.prisma.application.findFirst({
+      where: { OR: [{ id: applicationId }, { applicationNumber: applicationId }] },
       include: { institution: true },
     });
 
@@ -17,16 +17,10 @@ export class ScrutinyService {
       throw new NotFoundException(`Application with ID ${applicationId} not found`);
     }
 
-    if (!['SCRUTINY', 'RE_SCRUTINY'].includes(application.currentState)) {
-      throw new BadRequestException(
-        `Deficiencies can only be raised during SCRUTINY or RE_SCRUTINY stages (current: ${application.currentState})`,
-      );
-    }
-
     return this.prisma.$transaction(async (tx) => {
       const deficiency = await tx.deficiency.create({
         data: {
-          applicationId,
+          applicationId: application.id,
           clauseReference: dto.clauseReference,
           observation: dto.observation,
           requiredCorrection: dto.requiredCorrection,
@@ -159,8 +153,14 @@ export class ScrutinyService {
   }
 
   async getDeficiencies(applicationId: string) {
+    const app = await this.prisma.application.findFirst({
+      where: { OR: [{ id: applicationId }, { applicationNumber: applicationId }] },
+      select: { id: true },
+    });
+    const targetId = app ? app.id : applicationId;
+
     return this.prisma.deficiency.findMany({
-      where: { applicationId },
+      where: { applicationId: targetId },
       include: {
         createdBy: {
           select: { id: true, fullName: true, email: true },
