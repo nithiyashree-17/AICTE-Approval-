@@ -86,7 +86,7 @@ export default function LoginPage() {
         !redirectParam.includes('\\')
       ) {
         // Only allow redirect if permitted for this role
-        const { isRouteAllowedForRole } = await import('@flowguard/shared');
+        const { isRouteAllowedForRole } = await import('@/lib/shared');
         if (isRouteAllowedForRole(redirectParam, userRole)) {
           destination = redirectParam;
         }

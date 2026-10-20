@@ -1,4 +1,4 @@
-import { getRoleLandingRoute, ROLE_LABELS, RoleType } from '@flowguard/shared';
+import { getRoleLandingRoute, ROLE_LABELS, RoleType } from '@/lib/shared';
 
 export interface AuthUser {
   id: string;

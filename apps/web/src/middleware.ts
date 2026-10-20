@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
-import { isRouteAllowedForRole, getRoleLandingRoute } from '@flowguard/shared';
+import { isRouteAllowedForRole, getRoleLandingRoute } from './lib/shared';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.AUTH_SECRET ||
