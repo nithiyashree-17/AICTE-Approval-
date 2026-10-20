@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@flowguard/shared": "workspace:^",
     "@hookform/resolvers": "^6.0.0",
     "clsx": "^2.1.1",
     "jose": "^6.2.12",
